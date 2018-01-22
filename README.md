@@ -16,19 +16,6 @@ Python 3.5.2 or above and the following packages:
 - bokeh
 - matplotlib
 
-
-[//] ### Installing
-
-[//] ## Running the tests
-
-[//] ### Break down into end to end tests
-
-[//] ### And coding style tests
-
-[//] ## Deployment
-
-[//] ## Versioning
-
 ## Authors
 
 See the list of [contributors](https://github.com/YvonneYYu/CALPY/graphs/contributors) who participated in this project.
