@@ -26,4 +26,4 @@ This project is licensed under the MIT License - see the [LICENSE.md](https://gi
 
 ## Acknowledgments
 
-* This research is funded by Centre of Excellence for the Dynamics of Language
+This research is funded by Centre of Excellence for the Dynamics of Language.

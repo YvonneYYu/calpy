@@ -55,7 +55,7 @@ def RandomRun( length, distributions, min_run=100, max_more=100 ):
         N -= ext_length
         if N <= 0: return ans
 
-############generate pitch##############################################################################################
+#################################generate pitch#################################
 '''
 pipe line 1
 '''
@@ -84,7 +84,7 @@ fig2.show()
 #mfcc_prof = calpy.dsp.mfcc_profile(sig, fs, time_step = 0.025)
 #mfcc_prof = mfcc_prof.T
 
-############symbolisation###############################################################################################
+#############################symbolisation######################################
 '''
 pipe line 2
 '''
@@ -103,7 +103,7 @@ db_pitch = cluster.DBSCAN(eps=0.1, min_samples=20).fit(feature_pitch)
 symbols = db_pitch.labels_
 
 
-############entropy#####################################################################################################
+################################entropy#########################################
 '''
 pipe line 3
 '''
@@ -120,7 +120,7 @@ def entropy_profile( symbols, window_size = 100, time_step = 100 ):
 
 ent_prof = entropy_profile(symbols)
  
-############visualisation###############################################################################################
+###########################visualisation########################################
 fig = plt.figure()
 plt.plot(ent_prof)
 fig.show()

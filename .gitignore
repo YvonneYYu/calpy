@@ -3,3 +3,4 @@
 *.dat
 *.txt
 *.npy
+./.vscode
