@@ -1,7 +1,10 @@
 import numpy
 import matplotlib.pyplot as plt
 import calpy
-from sklearn import cluster
+from calpy.testing.experiments import *
+from calpy.entropy.entropy import entropy_profile
+#from sklearn import cluster
+
 ##########################generate artificial signals###########################
 '''
 Pipeline 0
@@ -27,58 +30,14 @@ for i in range(N):
     sig_b += sin_waves[N - 1 - i] #falling tone
     sig_c += sin_waves[N // 2] #monotonicity
 
-
-def RandSymbols( probs, length ):
-    if sum(probs) != 1:
-        print("Warning: probabilites must sum to 1")
-        return
- 
-    return numpy.random.choice( len(probs), length, p=probs )
- 
-
- 
-def RandomRun( length, distributions, min_run=100, max_more=100 ):
-
-    s1 = [0.8, 0.1, 0.1]
-    s2 = [0.4, 0.3, 0.3]
-    ss = [ s1, s2 ]
-    ans  = list()
-    k, N, M = 0, length, len(ss)
-     
-    while True:
-        ext_length = min_run + numpy.random.randint(0,max_more)
-        ext_length = min( ext_length, N )
-         
-        ans.extend( RandSymbols( distributions[k % M], ext_length ) )
-        k += 1 % M
- 
-        N -= ext_length
-        if N <= 0: return ans
+#generate signal according to a distribution
 
 #################################generate pitch#################################
 '''
 pipe line 1
 '''
 #set time_step == frame_size, no overlapping
-pitch_prof_a = calpy.dsp.pitch_profile(sig_a, fs, time_step = 0.025)
-pitch_prof_b = calpy.dsp.pitch_profile(sig_b, fs, time_step = 0.025)
-pitch_prof_c = calpy.dsp.pitch_profile(sig_c, fs, time_step = 0.025)
-
-t = range(len(pitch_prof_a))
-fig0 = plt.figure()
-plt.scatter(t, pitch_prof_a, label = 'symbols a rising')
-plt.legend()
-fig0.show()
-
-fig1 = plt.figure()
-plt.scatter(t, pitch_prof_b, label = 'symbols b falling')
-plt.legend()
-fig1.show()
-
-fig2 = plt.figure()
-plt.scatter(t, pitch_prof_c, label = 'symbols c level')
-plt.legend()
-fig2.show()
+pitch_prof = calpy.dsp.pitch_profile(sig, fs, time_step = 0.025)
 
 
 #mfcc_prof = calpy.dsp.mfcc_profile(sig, fs, time_step = 0.025)
@@ -87,7 +46,7 @@ fig2.show()
 #############################symbolisation######################################
 '''
 pipe line 2
-'''
+
 def hist_N_median_profile( xs, num_bins=3, window_size=10 ):
     N, res = len(xs), []
     edges = (xs.min(),xs.max())
@@ -101,26 +60,20 @@ def hist_N_median_profile( xs, num_bins=3, window_size=10 ):
 feature_pitch = hist_N_median_profile(pitch_prof)
 db_pitch = cluster.DBSCAN(eps=0.1, min_samples=20).fit(feature_pitch)
 symbols = db_pitch.labels_
-
+'''
+symbols = []
+    for pitch in numpy.array_split(pitch_prof, len(pitches) // N):
+        symbols.append( symbolise(pitch) )
 
 ################################entropy#########################################
 '''
 pipe line 3
 '''
-def entropy_profile( symbols, window_size = 100, time_step = 100 ):
-    N = len(symbols)
-    ent_prof = []
-    for k in range((N - window_size) // time_step):
-        window = symbols[k * time_step : k * time_step + window_size]
-        key, cnts = numpy.unique(window, return_counts=True)
-        cnts = cnts / numpy.sum(cnts)
-        probs = dict(zip(key,cnts))
-        ent_prof.append(-sum(probs[s] * numpy.log(probs[s]) for s in window))
-    return numpy.array(ent_prof)
+entropy_durations = [300, 500, 700, 900, 1000, 1100, 1200, 1400]
+for dur in entropy_durations:
+    ent_prof = entropy_profile(symbols, window_size=dur)
 
-ent_prof = entropy_profile(symbols)
- 
-###########################visualisation########################################
-fig = plt.figure()
-plt.plot(ent_prof)
-fig.show()
+    fig = plt.figure()
+    plt.plot(ent_prof)
+    plt.title("entropy profile with entropy duration of {}s ({} symbols per entropy)".format(int(dur * N * 0.01), dur))
+    fig.savefig("entropy_{}.png".format(dur))
