@@ -2,7 +2,6 @@ import numpy
 from .. import rqa
 from .. import dsp
 from .. import utilities
-from functools import reduce
 
 def artificial_signal( frequencys, sampling_frequency=16000, duration=0.025 ):
     """

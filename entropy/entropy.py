@@ -2,7 +2,6 @@ import numpy
 from .. import rqa
 from .. import dsp
 from .. import utilities
-from functools import reduce
 
 def entropy_profile( symbols, window_size = 100, window_overlap = 0 ):
     """
