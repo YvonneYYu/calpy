@@ -1,3 +1,7 @@
+"""
+Experiments on single frequency sinusoidal signals
+"""
+
 import numpy
 import matplotlib.pyplot as plt
 import calpy
