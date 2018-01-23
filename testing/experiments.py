@@ -17,14 +17,14 @@ def sinusoid( frequency, sampling_frequency=16000, duration=0.025 ):
     times = numpy.arange(int(sampling_frequency * duration))
     return numpy.sin(2 * numpy.pi * frequency * times / sampling_frequency)
 
-def random_symbols( probs, length ):
-    if sum(probs) != 1:
+def random_symbols( distribution, length ):
+    if sum(distribution) != 1:
         print("Warning: probabilites must sum to 1")
         return
 
-    return numpy.random.choice( len(probs), length, p=probs )
+    return numpy.random.choice( len(distribution), length, p=distribution )
 
-def random_run( length, distributions, min_run=100, max_more=100 ):
+def random_run( distributions, length, min_run=100, max_more=100 ):
     
     ans  = list()
     k, N, M = 0, length, len(distributions)
@@ -44,6 +44,10 @@ def symbolise( pitches, eps=8e-2 ):
     """
         eps :: float = tan(5 degrees) default
     """
+    #if input pitches are all 0.0, categorise it as silent (3)
+    if not pitches.any():
+        return 3
+
     N  = len(pitches)
     xs = numpy.arange(N)
     ys = pitches
@@ -54,9 +58,9 @@ def symbolise( pitches, eps=8e-2 ):
     #return m
 
     if m>eps:
-        return 0
+        return 0 #rising
     elif -eps <= m <= eps:
-        return 2
+        return 2 # level
     else:
-        return 1
+        return 1 # falling
 
