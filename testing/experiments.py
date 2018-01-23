@@ -17,14 +17,14 @@ def sinusoid( frequency, sampling_frequency=16000, duration=0.025 ):
     times = numpy.arange(int(sampling_frequency * duration))
     return numpy.sin(2 * numpy.pi * frequency * times / sampling_frequency)
 
-def random_symbols( probs, length ):
-    if sum(probs) != 1:
+def random_symbols( distribution, length ):
+    if sum(distribution) != 1:
         print("Warning: probabilites must sum to 1")
         return
 
-    return numpy.random.choice( len(probs), length, p=probs )
+    return numpy.random.choice( len(distribution), length, p=distribution )
 
-def random_run( length, distributions, min_run=100, max_more=100 ):
+def random_run( distributions, length, min_run=100, max_more=100 ):
     
     ans  = list()
     k, N, M = 0, length, len(distributions)
