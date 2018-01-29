@@ -16,13 +16,17 @@ Python 3.5.2 or above and the following packages:
 - bokeh
 - matplotlib
 
+### Installation
+run `pip install calpy` in terminal
 ## Authors
 
 See the list of [contributors](https://github.com/YvonneYYu/calpy/graphs/contributors) who participated in this project.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/YvonneYYu/calpy/blob/master/LICENSE) file for details
+
+This project is licensed under the MIT License
+
 
 ## Acknowledgments
 
