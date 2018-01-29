@@ -2,8 +2,8 @@ import numpy, math
 from .. import utilities
 
 class phase_space(object):
-"""Phase space class.
-"""
+    """Phase space class.
+    """
     def __init__(self, xs, tau=1, m=2, eps=.001):
         self.tau, self.m, self.eps = tau, m, eps
         
@@ -30,16 +30,16 @@ class phase_space(object):
         return id(self) == id(other)
 
 def _Theta(x, y, eps):
-"""Theta tmp
-    
-    Args:
-        x:
-        y:
-        eps:
+    """Theta tmp
+        
+        Args:
+            x:
+            y:
+            eps:
 
-    Returns:
-        int: 0 or 1.
-"""
+        Returns:
+            int: 0 or 1.
+    """
     sm  = 0
     for k in range(len(x)):
         sm += (x[k]-y[k])**2
@@ -89,28 +89,28 @@ def recurrence_matrix(xps, yps=None, joint=False):
     return _recurrence_matrix_cache[xps, yps, joint]
 
 def cross_recurrence_matrix( xps, yps ):
-"""Cross reccurence matrix.
+    """Cross reccurence matrix.
 
-    Args:
-        xps:
-        yps:
+        Args:
+            xps:
+            yps:
 
-    Returns:
-        numpy.array : A 2D numpy array.
+        Returns:
+            numpy.array : A 2D numpy array.
 
-"""
+    """
     return recurrence_matrix( xps, yps )
 
 def joint_recurrence_matrix( xps, yps ):
-"""Joint reccurence matrix.
+    """Joint reccurence matrix.
 
-    Args:
-        xps:
-        yps:
+        Args:
+            xps:
+            yps:
 
-    Returns:
-        numpy.array : A 2D numpy array.
-"""
+        Returns:
+            numpy.array : A 2D numpy array.
+    """
     return recurrence_matrix( xps, yps, joint=True )
 
 def recurrence_rate( AA ):
