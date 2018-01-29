@@ -6,6 +6,6 @@ setup(name='calpy',
       description='Communication Analytics Lab Toolbox',
       author =['Yvonne Yu', 'Paul Vrbik'],
       author_email = ['yeyang.yu@uqconnect.edu.au', 'paulvrbik@gmail.com'],
-      url = 'https://github.com/YvonneYYu/CALPY',
+      url = 'https://github.com/YvonneYYu/calpy',
       keywords = ['Natural Language Understanding', 'Signal Processing']
 )
