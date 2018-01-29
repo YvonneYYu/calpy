@@ -17,7 +17,7 @@ Python 3.5.2 or above and the following packages:
 - matplotlib
 
 ### Installation
-run 'pip install calpy' in terminal
+run `pip install calpy` in terminal
 ## Authors
 
 See the list of [contributors](https://github.com/YvonneYYu/CALPY/graphs/contributors) who participated in this project.
