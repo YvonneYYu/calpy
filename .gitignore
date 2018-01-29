@@ -8,3 +8,5 @@
 *.pdf
 *.eps
 ./.vscode
+./dist
+./calpy.egg-info
