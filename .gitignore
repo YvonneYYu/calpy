@@ -3,3 +3,8 @@
 *.dat
 *.txt
 *.npy
+*.png
+*.jpg
+*.pdf
+*.eps
+./.vscode

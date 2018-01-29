@@ -20,12 +20,14 @@ Python 3.5.2 or above and the following packages:
 run `pip install calpy` in terminal
 ## Authors
 
-See the list of [contributors](https://github.com/YvonneYYu/CALPY/graphs/contributors) who participated in this project.
+See the list of [contributors](https://github.com/YvonneYYu/calpy/graphs/contributors) who participated in this project.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.txt](https://github.com/YvonneYYu/CALPY/blob/master/LICENSE.txt) file for details
+
+This project is licensed under the MIT License
+
 
 ## Acknowledgments
 
-* This research is funded by Centre of Excellence for the Dynamics of Language
+This research is funded by Centre of Excellence for the Dynamics of Language.
