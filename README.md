@@ -25,7 +25,7 @@ See the list of [contributors](https://github.com/YvonneYYu/calpy/graphs/contrib
 ## License
 
 
-This project is licensed under the MIT License
+This project is licensed under the MIT License, please refer to [LICENSE.txt](https://github.com/YvonneYYu/calpy/blob/master/LICENSE.txt) for more details.
 
 
 ## Acknowledgments
