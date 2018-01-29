@@ -1,7 +1,4 @@
 import numpy
-from .. import rqa
-from .. import dsp
-from .. import utilities
 
 def entropy_profile( symbols, window_size = 100, window_overlap = 0 ):
     """

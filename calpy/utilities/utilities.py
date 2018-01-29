@@ -1,7 +1,7 @@
 #SHARED UTILITY TOOLS AND VARIABLES
 import numpy
 import scipy.io.wavfile
-from ..dsp import dsp
+from .. import dsp
 
 def pad_signal(signal, sampling_rate, time_step = 0.01, frame_window = 0.025):
     """

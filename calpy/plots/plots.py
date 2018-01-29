@@ -1,7 +1,7 @@
 import numpy
 import bokeh.plotting
 import bokeh.io
-from ..utilities import utilities
+from .. import utilities
 
 def recurrence( AA, ID=numpy.empty(0,dtype=int), colours=["red","blue","green"] ):
     """

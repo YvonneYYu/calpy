@@ -1,5 +1,5 @@
 import numpy, math
-from ..utilities import utilities
+from .. import utilities
 
 class phase_space(object):
     def __init__(self, xs, tau=1, m=2, eps=.001):
