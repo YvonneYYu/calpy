@@ -4,13 +4,15 @@ import bokeh.io
 from .. import utilities
 
 def recurrence( AA, ID=numpy.empty(0,dtype=int), colours=["red","blue","green"] ):
-    """
-        Plots a recurrence plot.
+    """Plots a recurrence plot.
         
-        AA :: reccurence matrix
-        ID :: vector so that speaker( col[i] ) = ID[i] 
+        Args:
+            AA (numpy.array(float)):  A  2D reccurence matrix.
+            ID (numpy.array(int)):  A vector so that speaker( col[i] ) = ID[i].  Defaults to the 0 vector.
+            colours (list(str)):  Colours for the plot.
 
-        return :: bokeh plot object
+        Returns:
+            bokeh plot object
     """
 
     isLower = utilities.is_lower_triangular(AA)
@@ -62,11 +64,28 @@ def recurrence( AA, ID=numpy.empty(0,dtype=int), colours=["red","blue","green"] 
     return plot
 
 def show( bokeh_plot ):
+"""Print a plot to the screen.
+
+    Args:
+        bokeh_plot (bokeh plot object)
+
+    Return
+        null:  Outputs a plot on the default plot device.
+"""
     bokeh.plotting.show( bokeh_plot )
     return
 
 def export( bokeh_plot, file_path, astype="png"):
+"""Save a plot as picture file.
 
+    Args:
+        bokeh_plot (bokeh plot object): The plot object to be saved.
+        file_path (str):  Where to save the picture.
+        astype (str):  The file type.  Defaults to png.
+
+    Return
+        null:  Outputs a plot to a file.
+"""
     if astype not in ["svg","png"]:
         print("Export type not supported.  Use 'svg' or 'png' only.")
         return

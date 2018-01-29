@@ -2,6 +2,8 @@ import numpy, math
 from .. import utilities
 
 class phase_space(object):
+"""Phase space class.
+"""
     def __init__(self, xs, tau=1, m=2, eps=.001):
         self.tau, self.m, self.eps = tau, m, eps
         
@@ -28,6 +30,16 @@ class phase_space(object):
         return id(self) == id(other)
 
 def _Theta(x, y, eps):
+"""Theta tmp
+    
+    Args:
+        x:
+        y:
+        eps:
+
+    Returns:
+        int: 0 or 1.
+"""
     sm  = 0
     for k in range(len(x)):
         sm += (x[k]-y[k])**2
@@ -37,11 +49,15 @@ def _Theta(x, y, eps):
 
 _recurrence_matrix_cache = dict()
 def recurrence_matrix(xps, yps=None, joint=False):
-    """
-        Computes cross-reccurence matrix when two inputs are given and self-reccurence otherwise.
+    """Computes cross-reccurence matrix when two inputs are given and self-reccurence otherwise.
 
-        xps [,yps, joint] :: phase_space object(s) and joint option
-        return :: 2D matrix
+    Args:
+        xps (numpy.array): Phase_space object(s).
+        yps (numpy.array, optional): Phase_space object for cross reccurence.  Defaults to none.
+        joint (bool):  Should joint reccurence be calculated?  Defaults to False.
+    
+    Returns:
+        numpy.array : A 2D numpy matrix.
     """
 
     if not yps:
@@ -73,16 +89,38 @@ def recurrence_matrix(xps, yps=None, joint=False):
     return _recurrence_matrix_cache[xps, yps, joint]
 
 def cross_recurrence_matrix( xps, yps ):
+"""Cross reccurence matrix.
+
+    Args:
+        xps:
+        yps:
+
+    Returns:
+        numpy.array : A 2D numpy array.
+
+"""
     return recurrence_matrix( xps, yps )
 
 def joint_recurrence_matrix( xps, yps ):
+"""Joint reccurence matrix.
+
+    Args:
+        xps:
+        yps:
+
+    Returns:
+        numpy.array : A 2D numpy array.
+"""
     return recurrence_matrix( xps, yps, joint=True )
 
 def recurrence_rate( AA ):
-    """
-        Computes reccurence-rate from reccurence matrix
-        AA :: recurrence_matrix
-        return :: ?
+    """Computes reccurence-rate from reccurence matrix
+
+    Args:
+        AA (numpy.array): A reccurence matrix.
+    
+    Returns:
+        numpy.array : A numpy array.
     """
 
     isLower = utilities.is_lower_triangular(AA)
@@ -110,10 +148,13 @@ def recurrence_rate( AA ):
 
 _measures_cache = dict()
 def determinism( AA ):
-    """
-        calculate percentage of recurrence points which form diagonal lines
-        AA :: reccurence matrix
-        return :: scalar
+    """Calculates percentage of recurrence points which form diagonal lines.
+        
+        Args:
+            AA (numpy.array): A reccurence matrix.
+        
+        Returns:
+            float: The determinism.
     """
 
     if (id(AA),"determinism") in _measures_cache:
@@ -178,7 +219,13 @@ def determinism( AA ):
 
 
 def divergence( AA ):
-    """
+    """Divergence
+
+        Args:
+            AA (numpy.array) : A numpy array.
+
+        Returns:
+            numpy.array : The answer.
     """
     if (id(AA),"divergence") not in _measures_cache:
         determinism(AA)
@@ -187,7 +234,13 @@ def divergence( AA ):
 
 
 def entropy( AA ):
-    """
+    """Entropy
+
+        Args:
+            AA (numpy.array) : A numpy array.
+
+        Returns:
+            numpy.array : The answer.
     """
     if (id(AA),"entropy") not in _measures_cache:
         determinism(AA)
@@ -196,7 +249,13 @@ def entropy( AA ):
 
 
 def pred( AA ):
-    """
+    """Pred
+
+        Args:
+            AA (numpy.array) : A numpy array.
+
+        Returns:
+            numpy.array : The answer.
     """
     if (id(AA),"pred") not in _measures_cache:
         determinism(AA)
@@ -205,9 +264,14 @@ def pred( AA ):
 
 
 def trend( AA, longterm=False ):
-    """
-        calculate the TREND of a give 1d numpy array R
-        return the medium and long range trends a float tuple (Med, Long)
+    """Calculate the TREND of a give 1d numpy array R
+    
+        Args:
+            AA (numpy.array(float)):  A 2D matrix.
+            longterm (bool):  Should long-term trend be calculate?  Defaults to False.
+
+        Returns:
+            float: The medium and long range trends a float tuple (Med, Long)
     """
     N = AA.shape[0]
     R_med  = R[:N//2] - np.mean(R[:N//2])
@@ -222,10 +286,15 @@ def trend( AA, longterm=False ):
     return Long if longterm else Med
 
 def laminarity( AA ): #+ Trapping
-    """
-        calculate percentage of recurrence points which form verticle lines
-        AA :: recurrence matrix 2D numpy array
-        return :: float scaler
+    """Laminarity.  Calculates percentage of recurrence points which form verticle lines.
+
+    This function calculates Trapping as a side effect.
+        
+        Args:
+            AA (numpy.array(float)):  A 2D matrix.
+        
+        Returns
+            float: The laminarity
     """
 
     N = AA.shape[0]
@@ -279,6 +348,16 @@ def laminarity( AA ): #+ Trapping
     return _measures_cache[id(AA),"laminarity"]
 
 def trapping( AA ):
+    """Trapping.  Calculates ...
+
+    This function calculates Laminiarity as a side effect.
+        
+        Args:
+            AA (numpy.array(float)):  A 2D matrix.
+        
+        Returns
+            float: The trapping
+    """
     if (id(AA),"trapping") not in _measures_cache:
         return laminarity(AA)
 

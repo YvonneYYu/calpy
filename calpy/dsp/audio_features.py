@@ -1,23 +1,31 @@
+# -*- coding: utf-8 -*-
+"""Audio features.
+
+Description of audio features.
+
+Example:
+    You can put an example.
+"""
+
 import numpy
 from scipy.fftpack import dct
 from .yin import *
 from ..utilities import utilities
 
 def _silence_or_sounding(signal, eps=1e-8):
-    """
-       Determine silence and sounding of a given (usually a relatively long period of time) audio
-       Reference:
-       @inproceedings{Sakhnov,
-            title={Dynamical energy-based speech/silence detector for speech enhancement applications},
-            author={Sakhnov, Kirill and Verteletskaya, Ekaterina and Simak, Boris},
-            booktitle={Proceedings of the World Congress on Engineering},
-            volume={1},  pages={2},  year={2009},  organization={Citeseer}
-            }
-        input:
-            signal :: sound signal in time domain :: 1D numpy float array or a 1D float list
-            eps  :: The minimum threshold :: a float number, default 1e-8. 
-        output:
-            marker: a 0-1 list marking silence (0) and sounding (1)
+    """Determine silence and sounding of a given (usually a relatively long period of time) audio.
+
+        Implements algorithms of `PAPER`_ .
+        
+        Args:
+            signal (numpy.array(float)): Sound signal in time domain.
+            eps (float, optional): The minimum threshold. Defaults to 1e-8.
+        
+        Returns:
+            list: A 0-1 list marking silence (0) and sounding (1).
+
+        .. _paper:
+            http://www.iaeng.org/publication/WCE2009/WCE2009_pp801-806.pdf
     """
     
     N = len(signal)
@@ -48,14 +56,15 @@ def _silence_or_sounding(signal, eps=1e-8):
     return marker
 
 def pause_profile(signal, sampling_rate, min_silence_duration=0.01, time_step = 0.01, frame_window = 0.025):
-    """
-        Determine pause sin a long audio (usually an entire covnersation)
-        input:
-            signal: audio signal :: 1D numpy float array or a 1D float list
-            sampling_rate: sampling frequency in Hz :: a float number
-            t: in second, the minimum time duration to be considered pause :: a float, Default 0.01
-        output:
-            ans: 0-1 1D numpy integer array with 1s marking pause
+    """Find pauses in audio.
+
+        Args:
+            signal (numpy.array(float)): Audio signal.
+            sampling_rate (float): Sampling frequency in Hz.
+            t (float): The minimum duration in seconds to be considered pause.
+        
+        Returns:
+            numpy.array(float): 0-1 1D numpy integer array with 1s marking pause.
     """
     
     signal = signal / max(abs(signal))
@@ -83,15 +92,16 @@ def pause_profile(signal, sampling_rate, min_silence_duration=0.01, time_step = 
     return utilities.compress_pause_to_time(ans, sampling_rate, time_step=time_step, frame_window=frame_window)
 
 def dB_profile(signal, sampling_rate, time_step = 0.01, frame_window = 0.025):
-    """
-        Computes decible of signal amplitude of an entire conversation
-        input:
-            signal: the padded audio signal :: 1D numpy float array or a float 1D list
-            sampling_rate: sampling frequency in Hz :: a float
-            time_step: the temporal step :: a float number, Default is 0.01 second
-            frame_window: the frame window :: a float number, Default is 0.025 second
-        output:
-            dB: the decible :: 1D float list
+    """Computes decible of signal amplitude of an entire conversation
+       
+        Args:
+            signal (numpy.array(float)): Padded audio signal.
+            sampling_rate (float): Sampling frequency in Hz.
+            time_step (float, optional): The time-step.  Defaults to 0.01 seconds.
+            frame_window (float, optional): The frame window.  Defaults to 0.025 seconds.
+        
+        Returns:
+            numpy.array(float): The decibles.
     """
     signal = numpy.abs(signal)
     
@@ -114,17 +124,16 @@ def dB_profile(signal, sampling_rate, time_step = 0.01, frame_window = 0.025):
     return vfunc(dB)
 
 def pitch_profile(signal, sampling_rate, time_step = 0.01, frame_window = 0.025, lower_threshold = 75, upper_threshold = 255):
-    """
-        Compute pitch for a long (usually over an entire conversation) sound signal
+    """Compute pitch for a long (usually over an entire conversation) sound signal
         input:
-            signal: padded audio signal :: 1D numpy float array or 1D float list
-            sampling_rate: sampling frequency in Hz :: a float number
-            time_step: temporal step in second :: a float, Default 0.01 second
-            frame_window: frame window :: a float, Default 0.025 second
-            lower: lower limit of pitch in Hz. Pitchs below this limit are not recruited :: a float, Default 75
-            upper: upper limit of pitch in Hz. Pitchs above this limit are not recruited :: a float, Default 250
+            signal (numpy.array(float)): Padded audio signal.
+            sampling_rate (float): Sampling frequency in Hz.
+            time_step (float, optional): The time-step.  Defaults to 0.01 seconds.
+            frame_window (float, optional): The frame window.  Defaults to 0.025 seconds.
+            lower (float, optional): Lower limit of pitch in Hz. Pitchs below this limit are not recorded. Defaults to 75 Hz.
+            upper (float, optional): Upper limit of pitch in Hz. Pitchs above this limit are not recorded. Defaults 250 Hz.
         output:
-            p: estimated pitch in Hz :: a 1D float list
+            numpy.array(float): Estimated pitch in Hz.
     """
     
     T  = int(sampling_rate * time_step)
@@ -144,20 +153,21 @@ def pitch_profile(signal, sampling_rate, time_step = 0.01, frame_window = 0.025,
     return p
 
 def mfcc_profile(signal, sampling_rate, time_step = 0.01, frame_window = 0.025, NFFT = 512, nfilt = 40, ceps = 12):
-    """
-        Author: YYY
-        Compute MFCC for a long (usually over an entire conversation) sound signal
-        reference: http://haythamfayek.com/2016/04/21/speech-processing-for-machine-learning.html
-        input:
-            signal: audio signal :: 1D numpy float array or 1D float list
-            sampling_rate: sampling frequency in Hz :: a float number
-            time_step: temporal step in second :: a float, Default 0.01 second
-            frame_window: frame window :: a float, Default 0.025 second
-            NFFT: NFFT-point FFT, default value is 512
-            nfilt: number of frequency bands in Mel-scaling, default value is 40
-            ceps: number of mel frequency ceptral coefficients to be retained, default value is 12
-        output:
-            mfccs: calculated Mel-Frequecy Cepstral Coefficients :: a 2D numpy array
+    """ Compute MFCC for a long (usually over an entire conversation) sound signal.
+
+        Reference: http://haythamfayek.com/2016/04/21/speech-processing-for-machine-learning.html
+
+        Args:
+            signal (numpy.array(float)): Padded audio signal.
+            sampling_rate (float): Sampling frequency in Hz.
+            time_step (float, optional): The time-step.  Defaults to 0.01 seconds.
+            frame_window (float, optional): The frame window.  Defaults to 0.025 seconds.
+            NFFT (int): NFFT-point FFT.  Defaults to 512.
+            nfilt (int): Number of frequency bands in Mel-scaling.  Defaults to 40.
+            ceps (int): Number of mel frequency ceptral coefficients to be retained.  Defaults to 12.
+
+        Returns:
+            numpy.array() : Calculated Mel-Frequecy Cepstral Coefficients Matrix.
     """
     
     T  = int(sampling_rate * time_step)
