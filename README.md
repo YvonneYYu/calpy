@@ -18,6 +18,10 @@ Python 3.5.2 or above and the following packages:
 
 ### Installation
 run `pip3 install calpy` in terminal
+
+## Documentation
+For help information, please visit [CALPY Documentation](https://yvonneyyu.github.io/calpy/).
+
 ## Authors
 
 See the list of [contributors](https://github.com/YvonneYYu/calpy/graphs/contributors) who participated in this project.
