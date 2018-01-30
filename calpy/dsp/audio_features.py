@@ -1,16 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Audio features.
-
-Description of audio features.
-
-Example:
-    You can put an example.
-"""
-
 import numpy
 from scipy.fftpack import dct
 from .yin import *
-from ..utilities import utilities
+from .. import utilities
 
 def _silence_or_sounding(signal, eps=1e-8):
     """Determine silence and sounding of a given (usually a relatively long period of time) audio.
@@ -59,7 +51,7 @@ def pause_profile(signal, sampling_rate, min_silence_duration=0.01, time_step = 
     """Find pauses in audio.
 
         Args:
-            signal (numpy.array(float)): Audio signal.
+            signal (:obj:`numpy.array(float)`): Audio signal.
             sampling_rate (float): Sampling frequency in Hz.
             t (float): The minimum duration in seconds to be considered pause.
         
@@ -125,14 +117,16 @@ def dB_profile(signal, sampling_rate, time_step = 0.01, frame_window = 0.025):
 
 def pitch_profile(signal, sampling_rate, time_step = 0.01, frame_window = 0.025, lower_threshold = 75, upper_threshold = 255):
     """Compute pitch for a long (usually over an entire conversation) sound signal
-        input:
+        
+        Args:
             signal (numpy.array(float)): Padded audio signal.
             sampling_rate (float): Sampling frequency in Hz.
             time_step (float, optional): The time-step.  Defaults to 0.01 seconds.
             frame_window (float, optional): The frame window.  Defaults to 0.025 seconds.
-            lower (float, optional): Lower limit of pitch in Hz. Pitchs below this limit are not recorded. Defaults to 75 Hz.
-            upper (float, optional): Upper limit of pitch in Hz. Pitchs above this limit are not recorded. Defaults 250 Hz.
-        output:
+            lower_threshold (int, optional): Defaults to 75.
+            upper_threshold (int, optional): Defaults to 225
+        
+        Returns:
             numpy.array(float): Estimated pitch in Hz.
     """
     

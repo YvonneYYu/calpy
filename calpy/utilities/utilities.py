@@ -1,7 +1,6 @@
 #SHARED UTILITY TOOLS AND VARIABLES
 import numpy
 import scipy.io.wavfile
-from .. import dsp
 
 def pad_signal(signal, sampling_rate, time_step = 0.01, frame_window = 0.025):
     """
@@ -72,22 +71,3 @@ def merge_pitch_profile( pitches, speaker_id ):
         merged_pitch_profile[i] = pitches[speaker_id[i]][i]
 
     return merged_pitch_profile
-
-def speaker_id( sounds, sampling_rate ):
-    """
-        sounds :: list( sound )
-        sampling_rate :: float
-        returns ans such that ans[i] = who is speaking at time-instance i
-    """
-
-    M = len(sounds)
-    dB_profs = list()
-    for i in range(M):
-        dB_profs.append( dsp.dB_profile( sounds[i], sampling_rate ) )
-
-    N = len(dB_profs[0])
-    ans = numpy.empty( N, dtype=int )
-    for i in range(N):
-        ans[i] = numpy.argmax( list(dB_profs[j][i] for j in range(M)) ) 
-    
-    return ans

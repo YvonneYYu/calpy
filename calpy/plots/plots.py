@@ -64,28 +64,28 @@ def recurrence( AA, ID=numpy.empty(0,dtype=int), colours=["red","blue","green"] 
     return plot
 
 def show( bokeh_plot ):
-"""Print a plot to the screen.
+    """Print a plot to the screen.
 
     Args:
-        bokeh_plot (bokeh plot object)
+        bokeh_plot: (bokeh plot object)
 
-    Return
+    Returns:
         null:  Outputs a plot on the default plot device.
-"""
+    """
     bokeh.plotting.show( bokeh_plot )
     return
 
 def export( bokeh_plot, file_path, astype="png"):
-"""Save a plot as picture file.
+    """Save a plot as picture file.
 
     Args:
         bokeh_plot (bokeh plot object): The plot object to be saved.
         file_path (str):  Where to save the picture.
         astype (str):  The file type.  Defaults to png.
 
-    Return
+    Returns:
         null:  Outputs a plot to a file.
-"""
+    """
     if astype not in ["svg","png"]:
         print("Export type not supported.  Use 'svg' or 'png' only.")
         return

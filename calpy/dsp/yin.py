@@ -1,13 +1,16 @@
 import numpy
 
 def difference_function(signal):
-    """
-        Calculate difference function of the signal.
-        Step 1 and 2 of YIN
-        Input:
-            signal: a small piece of audio signal :: 1D numpy float array
-        Output:
-            d: Equation (6) of YIN. The difference function d(t, tau) :: 1D float list
+    """Calculate difference function of the signal.  Step 1 and 2 of `YIN`_.
+        
+        Args:
+            signal (:obj:`numpy.array(float)`):  A short audio signal. 1D array.
+        
+        Returns:
+            :obj:`numpy.array(float)`: Equation (6) of `YIN`_. The difference function d(t, tau).  1D array.
+
+        .. _YIN:
+            https://www.ncbi.nlm.nih.gov/pubmed/12002874
     """
     N = len(signal)
     d = numpy.zeros(N//2+1)
@@ -21,14 +24,13 @@ def difference_function(signal):
     return d
 
 def normalisation(signal):
-    """
-        Normalise the difference function by the cumulative mean.
-        Step 3 of YIN
-        Input:
-            signal: a small piece of self correlated audio signal d(t, tau) processed by difFunction() :: 1D float list
-            N: length of audio signals to be analysed
-        Output:
-            signal: Equation (8) of YIN. Normalised difference function d'(t, tau), 1D list
+    """Normalise the difference function by the cumulative mean.  Step 3 of `YIN`_.
+        
+        Args:
+            signal (:obj:`numpy.array(float)`): A small piece of self correlated audio signal d(t, tau) processed by difFunction(). 1D array.
+
+        Returns:
+            :obj:`numpy.array(float)`: Equation (8) of `YIN`_. Normalised difference function d'(t, tau). 1D array.
     """
     N, signal[0] = len(signal), 1
     
@@ -40,14 +42,14 @@ def normalisation(signal):
     return signal
 
 def absolute_threshold(signal, threshold):
-    """
-        Absolute thresholdeshold
-        Step 4 in YIN
-        Input:
-            signal: a small piece normalised self correlated audio d'(t, tau) processed by normalisation(). 1D array like
-            threshold: thresholdeshold value
-        Output:
-            tau: the index
+    """ Absolute thresholdeshold. Step 4 in `YIN`_.
+        
+        Args:
+            signal (:obj:`numpy.array(float)`): A small piece normalised self correlated audio d'(t, tau) processed by normalisation(). 1D array like.
+            threshold (float): Thresholdeshold value.
+        
+        Returns:
+            float: The index tau.
     """
     #since signal[0] == 1, which is definitely greater than threshold, we start the search from the second element
     
@@ -67,15 +69,14 @@ def absolute_threshold(signal, threshold):
     return tau
 
 def parabolic_interpolation(signal, tau):
-    """
-        Parabolic Interpolation on tau
-        Step 5 in YIN
-        Input:
-            signal: a small piece normalised self correlated audio d'(t, tau) processed by normalisation(). 1D array like
-            N: length of audio signal to be analysed
-            tau: estimated tau in thresholdeshold(). An integer
-        Output:
-            estTau: better estimation of tau
+    """Parabolic Interpolation on tau.  Step 5 in `YIN`_.
+        
+        Args:
+            signal (:obj:`numpy.array(float)`): A small piece normalised self correlated audio d'(t, tau) processed by normalisation(). 1D array.
+            tau (int): Estimated thresholdeshold.
+        
+        Returns:
+            float: A better estimation of tau.
     """
     
     N, tau = len(signal), int(tau)
@@ -92,27 +93,16 @@ def parabolic_interpolation(signal, tau):
         return tau if 2 * s1 - s2 - s0 == 0 else tau + (s2 - s0) / (2 * (2 * s1 - s2 - s0))
 
 def instantaneous_pitch(signal, sampling_frequency, threshold=0.1):
-    """
-        Computes fundamental frequency (based on YIN) as pitch of a given
-        (usually a very short) time interval.
-        Signal Processing Reference:
-        @article{YIN,
-            title={YIN, a fundamental frequency estimator for speech and music},
-            author={De Cheveign{\'e}, Alain and Kawahara, Hideki},
-            journal={The Journal of the Acoustical Society of America},
-            volume={111},
-            number={4},
-            pages={1917--1930},
-            year={2002},
-            publisher={ASA}
-            }
-        C++ Code Reference (with significant changes):
-        https://github.com/ashokfernandez/Yin-Pitch-Tracking
-        Input:
-            signal: audio signal, 1D array like
-            fs: sampling frequency in Hz
-            threshold: absolute thresholdeshold value as defined in Step 4 of YIN. Default 0.1
-        Output:
+    """Computes fundamental frequency (based on `YIN`_) as pitch of a given (usually a very short) time interval.
+        
+        Code is an adpationation of  https://github.com/ashokfernandez/Yin-Pitch-Tracking.
+        
+        Args:
+            signal (:obj:`numpy.array(float)`): Audio signal. 1D array.
+            sampling_frequency (float): Sampling frequency in Hz.
+            threshold (float,optional): Absolute thresholdeshold value as defined in Step 4 of `YIN`_. Default 0.1
+        
+        Returns:
             f0: fundamental frequency in Hz (estimated speech pitch), a float
             p: probability
     """
