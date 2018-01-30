@@ -1,8 +1,8 @@
 from setuptools import setup
 import sys
 
-if sys.version_info < (3, 5, 2):
-      sys.exit('Sorry, Python < 3.5.2 is not supported. Please update Python.')
+if sys.version_info < (3, 6):
+      sys.exit('Sorry, Python < 3.6 is not supported. Please update Python.')
 
 setup(name='calpy',
       packages = ['calpy','calpy.dsp', 'calpy.entropy', 'calpy.rqa', 'calpy.plots', 'calpy.utilities'],
