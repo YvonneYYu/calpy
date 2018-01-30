@@ -1,4 +1,8 @@
 from setuptools import setup
+import sys
+
+if sys.version_info < (3, 5, 2):
+      sys.exit('Sorry, Python < 3.5.2 is not supported. Please update Python.')
 
 setup(name='calpy',
       packages = ['calpy','calpy.dsp', 'calpy.entropy', 'calpy.rqa', 'calpy.plots', 'calpy.utilities'],
@@ -8,5 +12,10 @@ setup(name='calpy',
       author_email = ['yeyang.yu@uqconnect.edu.au', 'paulvrbik@gmail.com'],
       url = 'https://github.com/YvonneYYu/calpy',
       license = 'MIT',
-      keywords = ['Natural Language Understanding', 'Signal Processing']
+      keywords = ['Natural Language Understanding', 'Signal Processing'],
+      install_requires = [
+            'numpy',
+            'scipy',
+            'math'
+      ]
 )
