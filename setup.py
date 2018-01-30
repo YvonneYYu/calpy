@@ -1,8 +1,22 @@
 from setuptools import setup
 import sys
+import os
 
+#install dependency if not a dependency is installed else continue
+def check_dependency(package):
+      try:
+            import package
+      except ImportError:
+            print('Dependency {} is not installed, installing it now!'.format(package))
+            os.system('sudo pip3 install {}'.format(package))
+
+packages = ['numpy', 'scipy', 'bokeh', 'matplotlib']
+for package in packages:
+      check_dependency(package)
+
+#abort installation if Python version does not meet requirement
 if sys.version_info < (3, 5):
-      sys.exit('Sorry, Python < 3.5 is not supported. Please update Python.')
+      sys.exit('Sorry, Python < 3.5 is not supported. Please update to Python 3.5 or above')
 
 setup(name='calpy',
       packages = ['calpy','calpy.dsp', 'calpy.entropy', 'calpy.rqa', 'calpy.plots', 'calpy.utilities'],
@@ -16,5 +30,7 @@ setup(name='calpy',
       install_requires = [
             'numpy',
             'scipy',
+            'bokeh',
+            'matplotlib'
       ]
 )
