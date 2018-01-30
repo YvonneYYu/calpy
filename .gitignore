@@ -1,13 +1,12 @@
 *.wav
 *.pyc
 *.dat
-*.txt
 *.npy
 *.png
 *.jpg
 *.pdf
 *.eps
-./.vscode
-./dist
-./calpy.egg-info
-./testing
+.vscode
+dist
+calpy.egg-info
+testing
