@@ -16,6 +16,5 @@ setup(name='calpy',
       install_requires = [
             'numpy',
             'scipy',
-            'math'
       ]
 )
