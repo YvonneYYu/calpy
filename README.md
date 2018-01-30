@@ -9,7 +9,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 
 ### Minimum Prerequisites (witout submodule plots)
-Python 3.5.2 or above and the following packages:
+Python 3.5 or above and the following packages:
 - numpy
 - scipy
 ### Optional Prerequisites (with submodule plots)
