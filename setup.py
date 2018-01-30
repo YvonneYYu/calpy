@@ -1,9 +1,8 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(name='calpy',
-      packages = ['calpy'],
+      packages = ['calpy','calpy.dsp', 'calpy.entropy', 'calpy.rqa', 'calpy.plots', 'calpy.utilities'],
       version='0.1.2',
-      packages = find_packages(exclude=['testing']),
       description='Communication Analytics Lab Toolbox',
       author =['Yvonne Yu & Paul Vrbik'],
       author_email = ['yeyang.yu@uqconnect.edu.au', 'paulvrbik@gmail.com'],
