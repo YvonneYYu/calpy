@@ -20,7 +20,7 @@ if sys.version_info < (3, 5):
 
 setup(name='calpy',
       packages = ['calpy','calpy.dsp', 'calpy.entropy', 'calpy.rqa', 'calpy.plots', 'calpy.utilities'],
-      version='0.1.3',
+      version='0.1.4',
       description='Communication Analytics Lab Toolbox',
       author =['Yvonne Yu & Paul Vrbik'],
       author_email = ['yeyang.yu@uqconnect.edu.au', 'paulvrbik@gmail.com'],
