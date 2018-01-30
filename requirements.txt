@@ -1,4 +1,0 @@
-numpy>=1.12.1
-scipy>=0.19.0
-bokeh>=0.12.6
-matplotlib>=2.0.2
