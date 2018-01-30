@@ -31,6 +31,7 @@ class phase_space(object):
 
 def _Theta(x, y, eps):
     """Theta tmp
+<<<<<<< HEAD
     
     Args:
         x:
@@ -39,6 +40,16 @@ def _Theta(x, y, eps):
 
     Returns:
         int: 0 or 1.
+=======
+        
+        Args:
+            x:
+            y:
+            eps:
+
+        Returns:
+            int: 0 or 1.
+>>>>>>> ae1d5ff3958ed40bf60d8e8ab0130a156ac63667
     """
     sm  = 0
     for k in range(len(x)):
@@ -91,12 +102,12 @@ def recurrence_matrix(xps, yps=None, joint=False):
 def cross_recurrence_matrix( xps, yps ):
     """Cross reccurence matrix.
 
-    Args:
-        xps:
-        yps:
+        Args:
+            xps:
+            yps:
 
-    Returns:
-        numpy.array : A 2D numpy array.
+        Returns:
+            numpy.array : A 2D numpy array.
 
     """
     return recurrence_matrix( xps, yps )
@@ -104,12 +115,17 @@ def cross_recurrence_matrix( xps, yps ):
 def joint_recurrence_matrix( xps, yps ):
     """Joint reccurence matrix.
 
-    Args:
-        xps:
-        yps:
+        Args:
+            xps:
+            yps:
 
+<<<<<<< HEAD
     Returns:
         numpy.array : A 2D numpy array.
+=======
+        Returns:
+            numpy.array : A 2D numpy array.
+>>>>>>> ae1d5ff3958ed40bf60d8e8ab0130a156ac63667
     """
     return recurrence_matrix( xps, yps, joint=True )
 
