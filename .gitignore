@@ -10,3 +10,4 @@
 ./.vscode
 ./dist
 ./calpy.egg-info
+./testing
