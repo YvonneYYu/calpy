@@ -53,7 +53,9 @@ def pause_profile(signal, sampling_rate, min_silence_duration=0.01, time_step = 
         Args:
             signal (:obj:`numpy.array(float)`): Audio signal.
             sampling_rate (float): Sampling frequency in Hz.
-            t (float): The minimum duration in seconds to be considered pause.
+            min_silence_duration (float, optional): The minimum duration in seconds to be considered pause. Default to 0.01.
+            time_step (float, optional): The time interval (in seconds) between two pauses. Default to 0.01.
+            frame_window (float, optional): The length of speech (in seconds) used to estimate pause. Default to 0.025.
         
         Returns:
             numpy.array(float): 0-1 1D numpy integer array with 1s marking pause.
@@ -89,8 +91,8 @@ def dB_profile(signal, sampling_rate, time_step = 0.01, frame_window = 0.025):
         Args:
             signal (numpy.array(float)): Padded audio signal.
             sampling_rate (float): Sampling frequency in Hz.
-            time_step (float, optional): The time-step.  Defaults to 0.01 seconds.
-            frame_window (float, optional): The frame window.  Defaults to 0.025 seconds.
+            time_step (float, optional): The time interval (in seconds) between two dB values. Default to 0.01.
+            frame_window (float, optional): The length of speech (in seconds) used to estimate dB. Default to 0.025.
         
         Returns:
             numpy.array(float): The decibles.
@@ -121,10 +123,10 @@ def pitch_profile(signal, sampling_rate, time_step = 0.01, frame_window = 0.025,
         Args:
             signal (numpy.array(float)): Padded audio signal.
             sampling_rate (float): Sampling frequency in Hz.
-            time_step (float, optional): The time-step.  Defaults to 0.01 seconds.
-            frame_window (float, optional): The frame window.  Defaults to 0.025 seconds.
+            time_step (float, optional): The time interval (in seconds) between two pitches. Default to 0.01.
+            frame_window (float, optional): The length of speech (in seconds) used to estimate pitch. Default to 0.025.
             lower_threshold (int, optional): Defaults to 75.
-            upper_threshold (int, optional): Defaults to 225
+            upper_threshold (int, optional): Defaults to 225.
         
         Returns:
             numpy.array(float): Estimated pitch in Hz.
@@ -154,11 +156,11 @@ def mfcc_profile(signal, sampling_rate, time_step = 0.01, frame_window = 0.025, 
         Args:
             signal (numpy.array(float)): Padded audio signal.
             sampling_rate (float): Sampling frequency in Hz.
-            time_step (float, optional): The time-step.  Defaults to 0.01 seconds.
-            frame_window (float, optional): The frame window.  Defaults to 0.025 seconds.
-            NFFT (int): NFFT-point FFT.  Defaults to 512.
-            nfilt (int): Number of frequency bands in Mel-scaling.  Defaults to 40.
-            ceps (int): Number of mel frequency ceptral coefficients to be retained.  Defaults to 12.
+            time_step (float, optional): The time interval (in seconds) between two MFCC. Default to 0.01.
+            frame_window (float, optional): The length of speech (in seconds) used to estimate MFCC. Default to 0.025.
+            NFFT (int, optional): NFFT-point FFT.  Defaults to 512.
+            nfilt (int, optional): Number of frequency bands in Mel-scaling.  Defaults to 40.
+            ceps (int, optional): Number of mel frequency ceptral coefficients to be retained.  Defaults to 12.
 
         Returns:
             numpy.array() : Calculated Mel-Frequecy Cepstral Coefficients Matrix.

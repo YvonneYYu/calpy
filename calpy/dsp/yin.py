@@ -46,7 +46,7 @@ def absolute_threshold(signal, threshold):
         
         Args:
             signal (:obj:`numpy.array(float)`): A small piece normalised self correlated audio d'(t, tau) processed by normalisation(). 1D array like.
-            threshold (float): Thresholdeshold value.
+            threshold (float): Threshold value.
         
         Returns:
             float: The index tau.
@@ -95,16 +95,15 @@ def parabolic_interpolation(signal, tau):
 def instantaneous_pitch(signal, sampling_frequency, threshold=0.1):
     """Computes fundamental frequency (based on `YIN`_) as pitch of a given (usually a very short) time interval.
         
-        Code is an adpationation of  https://github.com/ashokfernandez/Yin-Pitch-Tracking.
+        Code is an adpation of  https://github.com/ashokfernandez/Yin-Pitch-Tracking.
         
         Args:
             signal (:obj:`numpy.array(float)`): Audio signal. 1D array.
-            sampling_frequency (float): Sampling frequency in Hz.
+            sampling_frequency (int): Sampling frequency in Hz.
             threshold (float,optional): Absolute thresholdeshold value as defined in Step 4 of `YIN`_. Default 0.1
         
         Returns:
             f0: fundamental frequency in Hz (estimated speech pitch), a float
-            p: probability
     """
     
     N, tau = len(signal), -1

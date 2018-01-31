@@ -8,11 +8,11 @@ Created for the Communication Analytics Lab in the University of Queensland, Aus
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
 
-### Prerequisites
-Python 3.5.2 or above and the following packages:
+### Minimum Prerequisites (witout submodule plots)
+Python 3.5 or above and the following packages:
 - numpy
 - scipy
-- math
+### Optional Prerequisites (with submodule plots)
 - bokeh
 - matplotlib
 
