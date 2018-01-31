@@ -53,13 +53,13 @@ def symbolise( pitches, eps=8e-2 ):
     else:
         return 1 # falling
 
-def symbolise_speech(pitches, pauses, eps=5e-1):
+def symbolise_speech(pitches, pauses, eps=40):
     """Symbolise a small speech segment according to pitch and pause.
 
     Args:
         pitches (list(float)):  A list of pitches.
         pauses (list(int)):  A list of pauses.
-        eps (float, optional): Threshold of normalised pitch variation to be considered as atypical speech. Default to 0.5
+        eps (float, optional): Threshold of normalised pitch variation to be considered as atypical speech. Default to 40.
 
     Returns:
         int: one symbol of the small speech segment.
@@ -68,8 +68,10 @@ def symbolise_speech(pitches, pauses, eps=5e-1):
     if pauses.all():
         return 2
 
-    pitches /= numpy.max(pitches)
-    pitch_dif = numpy.sum(numpy.diff(pitches)) / (pitches.shape[0] - 1)
+    pitch_dif = numpy.diff(pitches)
+    pitch_dif = numpy.abs(pitch_dif)
+    pitch_dif = pitch_dif[numpy.where(pitch_dif > 0)]
+    pitch_dif = numpy.average(pitch_dif)
 
     #if average pitches change is greater than eps, then return symbol 1
     if pitch_dif > eps:
