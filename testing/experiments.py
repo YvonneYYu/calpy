@@ -74,4 +74,3 @@ def symbolise_speech(pitches, pauses, eps=5e-1):
         return 1
 
     return 0
-

@@ -3,10 +3,10 @@ Experiment on simple speech signals
 """
 import numpy
 import matplotlib.pyplot as plt
-from calpy.testing.experiments import symbolise_speech as symbolise
-from calpy.dsp.audio_features import pitch_profile, pause_profile
-from calpy.entropy.entropy import entropy_profile
-from calpy.utilities.utilities import read_wavfile
+from experiments import symbolise_speech as symbolise
+from calpy.dsp import pitch_profile, pause_profile
+from calpy.entropy import entropy_profile
+from calpy.utilities import read_wavfile
 
 
 def getPauseThred(pauses):
@@ -21,11 +21,16 @@ def getPauseThred(pauses):
     
     return thred
 
-def symbolisation(feature, thred):
-    N = numpy.ceil(feature.shape[1] / thred).astype(int)
+def getPitchThred(pitches):
+    pitches_diff = numpy.pitches_diff(pitches)
+    
+    return thred
+
+def symbolisation(feature, pause_thred, pitch_thred):
+    N = numpy.ceil(feature.shape[1] / pause_thred).astype(int)
     symbols =numpy.empty(N)
     for idx, data in numpy.array_split(feature, N):
-        symbols[idx] = symbolise(data[0], data[1])
+        symbols[idx] = symbolise(data[0], data[1], eps=pitch_thred)
     return symbols
 
 def entropys(symbols, entropy_durations, overlap_factor, N=N):

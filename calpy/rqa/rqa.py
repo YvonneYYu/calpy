@@ -31,16 +31,6 @@ class phase_space(object):
 
 def _Theta(x, y, eps):
     """Theta tmp
-<<<<<<< HEAD
-    
-    Args:
-        x:
-        y:
-        eps:
-
-    Returns:
-        int: 0 or 1.
-=======
         
         Args:
             x:
@@ -49,7 +39,6 @@ def _Theta(x, y, eps):
 
         Returns:
             int: 0 or 1.
->>>>>>> ae1d5ff3958ed40bf60d8e8ab0130a156ac63667
     """
     sm  = 0
     for k in range(len(x)):
@@ -62,13 +51,13 @@ _recurrence_matrix_cache = dict()
 def recurrence_matrix(xps, yps=None, joint=False):
     """Computes cross-reccurence matrix when two inputs are given and self-reccurence otherwise.
 
-    Args:
-        xps (numpy.array): Phase_space object(s).
-        yps (numpy.array, optional): Phase_space object for cross reccurence.  Defaults to none.
-        joint (bool):  Should joint reccurence be calculated?  Defaults to False.
-    
-    Returns:
-        numpy.array : A 2D numpy matrix.
+        Args:
+            xps (numpy.array): Phase_space object(s).
+            yps (numpy.array, optional): Phase_space object for cross reccurence.  Defaults to none.
+            joint (bool, optional):  Should joint reccurence be calculated?  Defaults to False.
+        
+        Returns:
+            numpy.array : A 2D numpy matrix.
     """
 
     if not yps:
@@ -103,8 +92,8 @@ def cross_recurrence_matrix( xps, yps ):
     """Cross reccurence matrix.
 
         Args:
-            xps:
-            yps:
+            xps (numpy.array):
+            yps (numpy.array):
 
         Returns:
             numpy.array : A 2D numpy array.
@@ -116,27 +105,22 @@ def joint_recurrence_matrix( xps, yps ):
     """Joint reccurence matrix.
 
         Args:
-            xps:
-            yps:
+            xps (numpy.array):
+            yps (numpy.array):
 
-<<<<<<< HEAD
-    Returns:
-        numpy.array : A 2D numpy array.
-=======
         Returns:
             numpy.array : A 2D numpy array.
->>>>>>> ae1d5ff3958ed40bf60d8e8ab0130a156ac63667
     """
     return recurrence_matrix( xps, yps, joint=True )
 
 def recurrence_rate( AA ):
-    """Computes reccurence-rate from reccurence matrix
+    """Computes reccurence-rate from reccurence matrix.
 
-    Args:
-        AA (numpy.array): A reccurence matrix.
-    
-    Returns:
-        numpy.array : A numpy array.
+        Args:
+            AA (numpy.array): A reccurence matrix.
+        
+        Returns:
+            numpy.array : A numpy array.
     """
 
     isLower = utilities.is_lower_triangular(AA)
@@ -238,10 +222,10 @@ def divergence( AA ):
     """Divergence
 
         Args:
-            AA (numpy.array) : A numpy array.
+            AA (numpy.array): A numpy array.
 
         Returns:
-            numpy.array : The answer.
+            numpy.array: The answer.
     """
     if (id(AA),"divergence") not in _measures_cache:
         determinism(AA)
@@ -253,10 +237,10 @@ def entropy( AA ):
     """Entropy
 
         Args:
-            AA (numpy.array) : A numpy array.
+            AA (numpy.array): A numpy array.
 
         Returns:
-            numpy.array : The answer.
+            numpy.array: The answer.
     """
     if (id(AA),"entropy") not in _measures_cache:
         determinism(AA)
@@ -268,10 +252,10 @@ def pred( AA ):
     """Pred
 
         Args:
-            AA (numpy.array) : A numpy array.
+            AA (numpy.array): A numpy array.
 
         Returns:
-            numpy.array : The answer.
+            numpy.array: The answer.
     """
     if (id(AA),"pred") not in _measures_cache:
         determinism(AA)
@@ -280,11 +264,11 @@ def pred( AA ):
 
 
 def trend( AA, longterm=False ):
-    """Calculate the TREND of a give 1d numpy array R
+    """Calculate the TREND of a give 1d numpy array R.
     
         Args:
             AA (numpy.array(float)):  A 2D matrix.
-            longterm (bool):  Should long-term trend be calculate?  Defaults to False.
+            longterm (bool, optional):  Should long-term trend be calculate?  Defaults to False.
 
         Returns:
             float: The medium and long range trends a float tuple (Med, Long)
@@ -309,7 +293,7 @@ def laminarity( AA ): #+ Trapping
         Args:
             AA (numpy.array(float)):  A 2D matrix.
         
-        Returns
+        Returns:
             float: The laminarity
     """
 
@@ -371,7 +355,7 @@ def trapping( AA ):
         Args:
             AA (numpy.array(float)):  A 2D matrix.
         
-        Returns
+        Returns:
             float: The trapping
     """
     if (id(AA),"trapping") not in _measures_cache:
