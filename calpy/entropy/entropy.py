@@ -53,28 +53,22 @@ def symbolise( pitches, eps=8e-2 ):
     else:
         return 1 # falling
 
-def symbolise_speech(pitches, pauses, eps=40):
+def symbolise_speech(pitches, pauses, thre=250):
     """Symbolise a small speech segment according to pitch and pause.
 
     Args:
         pitches (list(float)):  A list of pitches.
         pauses (list(int)):  A list of pauses.
-        eps (float, optional): Threshold of normalised pitch variation to be considered as atypical speech. Default to 40.
+        thre (float, optional): Threshold of high pitch.
 
     Returns:
         int: one symbol of the small speech segment.
     """
-    #if this is a long pause, then return symbol 2
+    #if all silent
     if pauses.all():
-        return 2
-
-    pitch_dif = numpy.diff(pitches)
-    pitch_dif = numpy.abs(pitch_dif)
-    pitch_dif = pitch_dif[numpy.where(pitch_dif > 0)]
-    pitch_dif = numpy.average(pitch_dif)
-
-    #if average pitches change is greater than eps, then return symbol 1
-    if pitch_dif > eps:
         return 1
-
+    #high pitch
+    if numpy.average(pitches) > thre:
+        return 2
+    #normal pitch
     return 0

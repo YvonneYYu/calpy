@@ -61,18 +61,12 @@ def symbolise( pitches, eps=8e-2 ):
     else:
         return 1 # falling
 
-def symbolise_speech(pitches, pauses, eps=44):
-    #if this is a long pause, then return symbol 2
+def symbolise_speech(pitches, pauses, thre=255):
+    #if all silent
     if pauses.all():
-        return 2
-
-    pitch_dif = numpy.diff(pitches)
-    pitch_dif = numpy.abs(pitch_dif)
-    pitch_dif = pitch_dif[numpy.where(pitch_dif > 0)]
-    pitch_dif = numpy.average(pitch_dif)
-
-    #if average pitches change is greater than eps, then return symbol 1
-    if pitch_dif > eps:
         return 1
-
+    #high pitch
+    if numpy.average(pitches) > thre:
+        return 2
+    #normal pitch
     return 0
