@@ -14,18 +14,7 @@
 #
 import os
 import sys
-
-sys.path.insert(0, os.path.abspath('../'))
-sys.path.insert(0, os.path.abspath('../'))
-
-sys.path.insert(0,'/Users/uqpvrbik/SVN/calpy')
-sys.path.insert(0,os.path.abspath('../calpy/') )
-
-sys.path.insert(0,os.path.abspath('../calpy/dsp') )
-sys.path.insert(0,os.path.abspath('../calpy/entropy') )
-sys.path.insert(0,os.path.abspath('../calpy/plots') )
-sys.path.insert(0,os.path.abspath('../calpy/rqa') )
-sys.path.insert(0,os.path.abspath('../calpy/utilities') )
+sys.path.insert(0, os.path.abspath('../../'))
 
 
 # -- Project information -----------------------------------------------------

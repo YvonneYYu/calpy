@@ -1,6 +1,7 @@
 import numpy
 import bokeh.plotting
 import bokeh.io
+import matplotlib.pyplot as plt
 from .. import utilities
 
 def recurrence( AA, ID=numpy.empty(0,dtype=int), colours=["red","blue","green"] ):
@@ -66,19 +67,11 @@ def recurrence( AA, ID=numpy.empty(0,dtype=int), colours=["red","blue","green"] 
 def show( bokeh_plot ):
     """Print a plot to the screen.
 
-<<<<<<< HEAD
     Args:
         bokeh_plot: (bokeh plot object)
 
     Returns:
         null:  Outputs a plot on the default plot device.
-=======
-        Args:
-            bokeh_plot (bokeh plot object)
-
-        Return
-            null:  Outputs a plot on the default plot device.
->>>>>>> ae1d5ff3958ed40bf60d8e8ab0130a156ac63667
     """
     bokeh.plotting.show( bokeh_plot )
     return
@@ -91,13 +84,8 @@ def export( bokeh_plot, file_path, astype="png"):
             file_path (str):  Where to save the picture.
             astype (str):  The file type.  Defaults to png.
 
-<<<<<<< HEAD
     Returns:
         null:  Outputs a plot to a file.
-=======
-        Return
-            null:  Outputs a plot to a file.
->>>>>>> ae1d5ff3958ed40bf60d8e8ab0130a156ac63667
     """
     if astype not in ["svg","png"]:
         print("Export type not supported.  Use 'svg' or 'png' only.")
@@ -111,3 +99,35 @@ def export( bokeh_plot, file_path, astype="png"):
         bokeh_plot.output_backend = "svg"
         bokeh.io.export_svgs( bokeh_plot, filename=file_path+"."+astype)
         return
+
+def profile_plot( ys, xlabel="", ylabel="", file_name="", figsize=(8,4) ):
+    """Plots points on the plane and connects with a line.
+    
+        Args:
+            ys (numpy.array(floats)):  List of numeric values to be plotted.
+            xlabel (str, optional):  The name for the x-axis.  Defaults to emtpy.
+            ylabel (str, optional):  The name for the y-axis.  Defaults to emtpy.
+            file_name (str, optional):  Outputs picture to this file_name.  Defaults to empty.
+            figsize (tuple(float,float), optional):  A tuple specifying (width, height) in inches of plot.  Defaults to (8,4)
+
+        Returns:
+            null : Saves an image to file_name else displays to default plot
+    """
+    
+    #define plot size in inches (width, height) & resolution(DPI)
+    fig = plt.figure( figsize=figsize )
+    
+    plt.plot( ys, 'm-o',  ms=3 )
+        
+    if ylabel:
+        plt.ylabel(ylabel)
+
+    if xlabel:
+        plt.xlabel(xlabel)
+
+    if file_name:
+        plt.savefig(file_name)
+    else:
+        plt.show()
+    
+    return 

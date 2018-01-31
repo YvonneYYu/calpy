@@ -1,1 +1,5 @@
-from .plots import recurrence, show, export
+from .plots import \
+    recurrence,\
+    show,\
+    export,\
+    profile_plot
