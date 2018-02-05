@@ -1,5 +1,6 @@
-from .plots import \
+from .plots import\
     recurrence,\
     show,\
     export,\
-    profile_plot
+    profile_plot,\
+    mfcc_plot
