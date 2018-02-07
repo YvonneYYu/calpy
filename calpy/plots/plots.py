@@ -100,7 +100,7 @@ def export( bokeh_plot, file_path, astype="png"):
         bokeh.io.export_svgs( bokeh_plot, filename=file_path+"."+astype)
         return
 
-def profile_plot( ys, xlabel="", ylabel="", file_name="", figsize=(8,4) ):
+def profile_plot( ys, xlabel="", ylabel="", file_name="", figsize=(8,4), remove_zeros=False ):
     """Plots points on the plane and connects with a line.
     
         Args:
@@ -109,11 +109,14 @@ def profile_plot( ys, xlabel="", ylabel="", file_name="", figsize=(8,4) ):
             ylabel (str, optional):  The name for the y-axis.  Defaults to emtpy.
             file_name (str, optional):  Outputs picture to this file_name.  Defaults to empty.
             figsize (tuple(float,float), optional):  A tuple specifying (width, height) in inches of plot.  Defaults to (8,4)
+            remove_zeros (bool, optional):  Toggle for replacing 0s with NANs.  Defaults to False.
 
         Returns:
             null : Saves an image to file_name else displays to default plot
     """
-    
+    if remove_zeros:
+        ys[numpy.where(ys == 0)] = numpy.nan
+
     #define plot size in inches (width, height) & resolution(DPI)
     fig = plt.figure( figsize=figsize )
     
@@ -131,3 +134,27 @@ def profile_plot( ys, xlabel="", ylabel="", file_name="", figsize=(8,4) ):
         plt.show()
     
     return 
+
+def mfcc_plot( AA, file_name="", figsize=(16,4) ):
+    """Plots points on the plane and connects with a line.
+    
+        Args:
+            AA (numpy.array(floats)):  2D array containing the MFCC.
+            file_name (str, optional):  Outputs picture to this file_name.  Defaults to empty.
+            figsize (tuple(float,float), optional):  A tuple specifying (width, height) in inches of plot.  Defaults to (8,4)
+
+        Returns:
+            null : Saves an image to file_name else displays to default plot
+    """
+
+    plt.figure(figsize=figsize)
+    plt.imshow( AA, cmap = 'hot', alpha = 1, aspect="auto")
+    plt.tight_layout()
+    plt.axis('off')
+
+    if file_name:
+        plt.savefig( file_name )
+    else:
+        plt.show()
+    
+    return
