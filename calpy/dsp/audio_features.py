@@ -117,6 +117,7 @@ def dB_profile(signal, sampling_rate, time_step = 0.01, frame_window = 0.025):
     vfunc = numpy.vectorize(lambda x: -float('inf') if not x else numpy.log(x) - numpy.log(ref))
     return vfunc(dB)
 
+#@profile
 def pitch_profile(signal, sampling_rate, time_step = 0.01, frame_window = 0.025, lower_threshold = 75, upper_threshold = 255):
     """Compute pitch for a long (usually over an entire conversation) sound signal
         

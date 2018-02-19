@@ -1,5 +1,6 @@
 import numpy
 
+@profile
 def difference_function(signal):
     """Calculate difference function of the signal.  Step 1 and 2 of `YIN`_.
         
@@ -14,13 +15,22 @@ def difference_function(signal):
     """
     N = len(signal)
     d = numpy.zeros(N//2+1)
-    y = signal
+    y = numpy.copy(signal)
+
+#    OLD CODE
+#    for tau in range(N//2):
+#        y = numpy.roll(y,-1)
+#        z = signal-y
+#        d[tau+1] = numpy.dot(z, z)
+#    return d
     
+    x2 = numpy.dot(signal,signal)
     for tau in range(N//2):
-        y = numpy.roll(y,-1)
-        z = signal-y
-        d[tau+1] = numpy.dot(z, z)
-    
+        tmp = y[0]
+        y[:-1] = y[1:]
+        y[-1] = tmp
+        d[tau+1] = 2*x2 - 2*numpy.dot(signal, y)
+
     return d
 
 def normalisation(signal):
@@ -92,6 +102,7 @@ def parabolic_interpolation(signal, tau):
         s0, s1, s2 = signal[x1], signal[tau], signal[x2]
         return tau if 2 * s1 - s2 - s0 == 0 else tau + (s2 - s0) / (2 * (2 * s1 - s2 - s0))
 
+#@profile
 def instantaneous_pitch(signal, sampling_frequency, threshold=0.1):
     """Computes fundamental frequency (based on `YIN`_) as pitch of a given (usually a very short) time interval.
         
