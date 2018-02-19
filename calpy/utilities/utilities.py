@@ -77,6 +77,9 @@ def read_wavfile( filename, channel=0 ):
     
     return sampling_rate, datas
 
+def write_wavfile(filename, fs, data):
+    scipy.io.wavfile.write(filename, fs, data)
+
 def merge_pitch_profile( pitches, speaker_id ):
     """merges n-pitch profiles into one sound based on speaker_id.
 

@@ -10,3 +10,4 @@
 dist
 calpy.egg-info
 testing
+__pycahce__
