@@ -1,6 +1,5 @@
 import numpy
 
-@profile
 def difference_function(signal):
     """Calculate difference function of the signal.  Step 1 and 2 of `YIN`_.
         

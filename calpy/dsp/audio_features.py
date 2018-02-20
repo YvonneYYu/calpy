@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy
 from scipy.fftpack import dct
+import scipy.io.wavfile as wf
 from .yin import *
 from .. import utilities
 
@@ -117,7 +118,6 @@ def dB_profile(signal, sampling_rate, time_step = 0.01, frame_window = 0.025):
     vfunc = numpy.vectorize(lambda x: -float('inf') if not x else numpy.log(x) - numpy.log(ref))
     return vfunc(dB)
 
-#@profile
 def pitch_profile(signal, sampling_rate, time_step = 0.01, frame_window = 0.025, lower_threshold = 75, upper_threshold = 255):
     """Compute pitch for a long (usually over an entire conversation) sound signal
         
@@ -210,3 +210,50 @@ def mfcc_profile(signal, sampling_rate, time_step = 0.01, frame_window = 0.025, 
         res[:, i] = mfcc[1 : ceps + 1]
  
     return res
+
+def remove_long_pauses(inputfilename, outputfilename, long_pause=0.5, min_silence_duration=0.01):
+    """Remove long pauses/silence in a wav file.
+        
+        Args:
+            inputfilename (string): file name of input wav.
+            outputfilename (string): file name of output wav.
+            long_pause (float, optional): minimum duration of silence to be considered a long pause, in seconds. Defaults to 0.5.
+            min_silence_duration (float, optional): The minimum duration in seconds to be considered pause. Default to 0.01.
+        
+        Returns:
+            NULL: writes a wav file to disk.
+    """
+    fs, sound = wf.read(inputfilename)
+    long_pause = int(long_pause / min_silence_duration)
+    if len(sound.shape) > 1:
+        pauses = pause_profile(sound[:,0], fs, min_silence_duration=min_silence_duration)
+    else:
+        pauses = pause_profile(sound, fs, min_silence_duration=min_silence_duration)
+    cnt = idx0 = 0
+    idxs = []
+    for idx, pause in enumerate(pauses):
+        if pause:
+            if cnt == 0:
+                idx0 = idx
+            cnt += 1
+        elif cnt:
+            if cnt >= long_pause:
+                idxs.append((idx0, idx))
+            cnt = 0
+    if idxs[-1][-1] != pauses.shape[0]:
+        idxs.append((pauses.shape[0], pauses.shape[0]))
+    if len(sound.shape) > 1:
+        sounding_sound = numpy.array([[0], [0]], dtype=type(sound[0, 0])).T
+        s = 0
+        for idx in idxs:
+            e = idx[0] * fs // 100
+            sounding_sound = numpy.append(sounding_sound, sound[s:e,:], axis=0)
+            s = idx[1] * fs // 100
+    else:
+        sounding_sound = numpy.array([], dtype=type(sound[0]))
+        s = 0
+        for idx in idxs:
+            e = idx[0] * fs // 100
+            sounding_sound = numpy.append(sounding_sound, sound[s:e])
+            s = idx[1] * fs // 100
+    wf.write(outputfilename, fs, sounding_sound)

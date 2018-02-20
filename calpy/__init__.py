@@ -1,2 +1,6 @@
-#__all__ = []
-from . import dsp, entropy, plots, rqa, utilities
+from . import \
+dsp, \
+entropy, \
+plots, \
+rqa, \
+utilities
