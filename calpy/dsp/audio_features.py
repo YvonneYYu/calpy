@@ -115,7 +115,7 @@ def dB_profile(signal, sampling_rate, time_step = 0.01, frame_window = 0.025):
     for i in range(N):
         dB[i] = sum(signal[i*Fr:(i+1)*Fr])/(Fr-1)
 
-    vfunc = numpy.vectorize(lambda x: -float('inf') if not x else numpy.log(x) - numpy.log(ref))
+    vfunc = numpy.vectorize(lambda x: -float('inf') if not x else 20 * numpy.log(x) - ref)
     return vfunc(dB)
 
 def pitch_profile(signal, sampling_rate, time_step = 0.01, frame_window = 0.025, lower_threshold = 75, upper_threshold = 255):
