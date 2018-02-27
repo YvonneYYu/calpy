@@ -1,4 +1,4 @@
-from .plots import\
+from .plots import \
     recurrence,\
     show,\
     export,\

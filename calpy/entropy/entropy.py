@@ -72,3 +72,13 @@ def symbolise_speech(pitches, pauses, thre=250):
         return 2
     #normal pitch
     return 0
+
+def symbolise_mfcc(mfcc):
+    symbols = numpy.zeros(mfcc.shape[1])
+    mu = numpy.average(mfcc, axis=1)
+    low_mu, med_mu, high_mu = numpy.average(mu[:4]), numpy.average(mu[4:8]), numpy.average(mu[8:12])
+    for i, mf in enumerate(mfcc.T):
+        symbols[i] = symbols[i] * 2 +  int(numpy.average(mf[8:]) > high_mu)
+        symbols[i] = symbols[i] * 2 + int(numpy.average(mf[4:8]) > med_mu)
+        symbols[i] = symbols[i] * 2 +int(numpy.average(mf[:4]) > low_mu)
+    return symbols

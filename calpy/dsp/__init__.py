@@ -10,4 +10,5 @@ from .audio_features import \
     dB_profile, \
     pitch_profile, \
     pause_profile, \
-    mfcc_profile
+    mfcc_profile, \
+    remove_long_pauses
