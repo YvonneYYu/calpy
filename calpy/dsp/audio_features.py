@@ -269,8 +269,7 @@ def pause_length_histogram(pauses, min_silence_duration=0.01,bins=30):
             hist (numpy array): The values of the histogram.
             bin_edges (numpy array, float): the bin edges (length(hist)+1) in seconds.
     """
-    if type(bins) != int:
-        raise ValueError("input to bins must be an integer.")
+    assert type(bins) == int, "input to bins must be an integer."
 
     pause_len = numpy.array([])
     cnt = 0
