@@ -257,3 +257,28 @@ def remove_long_pauses(inputfilename, outputfilename, long_pause=0.5, min_silenc
             sounding_sound = numpy.append(sounding_sound, sound[s:e])
             s = idx[1] * fs // 100
     wf.write(outputfilename, fs, sounding_sound)
+
+def pause_length_histogram(pauses, min_silence_duration=0.01,bins=30):
+    """Compute the histogram of pause lenghth.
+        Args:
+            pauses (numpy array, bool): True indicates occurrence of pause.
+            min_silence_duration (float, optional): The minimum duration in seconds to be considered pause. If not provided, then default to 0.01.
+            bins (int, optional): Defines the number of equal-width bins in the given range. Defaults to 30.
+        
+        Returns:
+            hist (numpy array): The values of the histogram.
+            bin_edges (numpy array, float): the bin edges (length(hist)+1) in seconds.
+    """
+    if type(bins) != int:
+        raise ValueError("input to bins must be an integer.")
+
+    pause_len = numpy.array([])
+    cnt = 0
+    for pause in pauses:
+        if pause:
+            cnt += 1
+        elif cnt:
+            pause_len = numpy.append(pause_len, cnt)
+            cnt = 0
+    hist, bin_edges = numpy.histogram(pause_len,bins=bins)
+    return (hist, bin_edges * min_silence_duration)
