@@ -20,13 +20,13 @@ if sys.version_info < (3, 5):
 
 setup(name='calpy',
       packages = ['calpy','calpy.dsp', 'calpy.entropy', 'calpy.rqa', 'calpy.plots', 'calpy.utilities'],
-      version='0.1.4',
+      version='0.1.5',
       description='Communication Analytics Lab Toolbox',
       author =['Yvonne Yu & Paul Vrbik'],
       author_email = ['yeyang.yu@uqconnect.edu.au', 'paulvrbik@gmail.com'],
       url = 'https://github.com/YvonneYYu/calpy',
       license = 'MIT',
-      keywords = ['Natural Language Understanding', 'Signal Processing'],
+      keywords = ['Natural Language Understanding'],
       install_requires = [
             'numpy',
             'scipy',
