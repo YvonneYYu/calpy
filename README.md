@@ -17,7 +17,8 @@ Python 3.5 or above and the following packages:
 - matplotlib
 
 ### Installation
-run `pip3 install calpy` in terminal
+to intall prerequisites, run `pip3 install -r requirements.txt`
+then run `pip3 install calpy` in terminal
 
 ## Documentation
 For help information, please visit [CALPY Documentation](https://yvonneyyu.github.io/calpy/).
@@ -34,4 +35,4 @@ This project is licensed under the MIT License, please refer to [LICENSE.txt](ht
 
 ## Acknowledgments
 
-This research is funded by Centre of Excellence for the Dynamics of Language.
+This research is funded by CoEDL(Centre of Excellence for the Dynamics of Language).
