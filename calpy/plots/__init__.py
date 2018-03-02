@@ -3,4 +3,5 @@ from .plots import \
     show,\
     export,\
     profile_plot,\
-    mfcc_plot
+    mfcc_plot,\
+    all_profile_plot
