@@ -4,7 +4,7 @@ def entropy_profile( symbols, window_size = 100, window_overlap = 0 ):
     """Calculate the entropy profile of a list of symbols.
 
     Args:
-        symbols (list(int)):  A list of symbols.
+        symbols (numpy.array or list (int)):  A list of symbols.
         window_size (int, optional):  Number of symbols per entropy window.  Defaults to 100.
         window_overlap (int, optional):  How much the entropy windows should overlap.  Defaults to 0.
     
@@ -27,7 +27,7 @@ def symbolise( pitches, eps=8e-2 ):
     """Symbolose a small piece of speech segment according to pitch slopes.
 
     Args:
-        pitches (list(float)):  A list of pitches.
+        pitches (numpy.array or list (float)):  A list of pitches.
         eps (float, optional):  Treshold of pitch slopes to be considered level.  Defaults to tan(5 degrees).
 
     Returns:
@@ -57,8 +57,8 @@ def symbolise_speech(pitches, pauses, thre=250):
     """Symbolise a small speech segment according to pitch and pause.
 
     Args:
-        pitches (list(float)):  A list of pitches.
-        pauses (list(int)):  A list of pauses.
+        pitches (numpy.array(float)):  A list of pitches.
+        pauses (numpy.array(int)):  A list of pauses.
         thre (float, optional): Threshold of high pitch.
 
     Returns:
@@ -74,6 +74,14 @@ def symbolise_speech(pitches, pauses, thre=250):
     return 0
 
 def symbolise_mfcc(mfcc):
+    """Symbolise speech according to mfcc.
+
+    Args:
+        mfcc (2D numpy.array (float)): A list of mfcc, axis 1 is time and axis 0 is mfcc
+
+    Returns:
+        symbols (numpy.array (float)): A list of symbols.
+    """
     symbols = numpy.zeros(mfcc.shape[1])
     mu = numpy.average(mfcc, axis=1)
     low_mu, med_mu, high_mu = numpy.average(mu[:4]), numpy.average(mu[4:8]), numpy.average(mu[8:12])
@@ -81,4 +89,20 @@ def symbolise_mfcc(mfcc):
         symbols[i] = symbols[i] * 2 +  int(numpy.average(mf[8:]) > high_mu)
         symbols[i] = symbols[i] * 2 + int(numpy.average(mf[4:8]) > med_mu)
         symbols[i] = symbols[i] * 2 +int(numpy.average(mf[:4]) > low_mu)
+    return symbols
+
+def symbolise_mfcc_multidimension(mfcc):
+    """Symbolise speech in multi-dimensional scale according to mfcc.
+
+    Args:
+        mfcc (2D numpy.array (float)): A list of mfcc, axis 1 is time and axis 0 is mfcc
+
+    Returns:
+        symbols (2D numpy.array(int)): Multi-dimensional symbols. A 2D numpy.array with the same shape as input mfcc
+    """
+    mfcc = zscore(mfcc, axis=1)
+    symbols = numpy.zeros(mfcc.shape)
+    symbols[numpy.where( numpy.abs(mfcc) <= 1 )] = 1
+    symbols[numpy.where( mfcc > 1)] = 2
+
     return symbols
