@@ -33,6 +33,44 @@ def entropys(symbols, entropy_durations, overlap_factors):
             ent_prof = numpy.append(t, ent_prof, axis=0)
             numpy.save(path + "entropy_with_time_info{}_{:.1f}".format(dur, overlap_factor), ent_prof)
 
+def estimate_Gaussian(X):
+    """Estimate the parametres of a Gaussian distribution using X
+
+    Args:
+        X (numpy.array (float)): Training dataset with features along axis 0, and examples along axis 1.
+
+    Returns:
+        Mu (numpy.array (float)): mean of the X (n by 1 dimension).
+        Sigma2 (numpy.array (float)): variance of X (n by 1 dimension).
+    """
+
+    Mu = numpy.mean(X, axis=1).reshape(X.shape[0], 1)
+    Sigma2 = numpy.var(X. axis=1).reshape(X.shape[0], 1)
+    return (Mu, Sigma2)
+
+
+def multivariate_Gaussion(X, Mu, Sigma2):
+    """Computes the probability density function of multivariate Gaussian distribution.
+
+    Args:
+        X (1D numpy.array (float)): n by 1 feature vector.
+        Mu (1D numpy.array (float)): n by 1 mean vector.
+        Sigma2 (1D numpy.array (float)): n by 1 variance vector.
+
+    Returns:
+        p (float): probability of input X.
+    """
+    assert X.shape == Mu.shape, "Input X and Mu must be the same shape"
+    assert Mu.shape == Sigma2.shape, "Input Mu and Sigma2 must be the same shape"
+    Sigma2 = numpy.diagflat(Sigma2)
+    Sigma2_inv = numpy.linalg.inv(Sigma2)
+    k = X.shape[0]
+    p = 1 / numpy.sqrt( (2 * numpy.pi) ** k * numpy.linalg.det(Sigma2) )
+    exp_power = -0.5 * numpy.dot( numpy.dot( (X - Mu).T, Sigma2_inv ), (X - Mu) )
+    p *= numpy.exp(exp_power)
+
+    return p
+    
 path = './entropy_machine_learning_results/'
 if not os.path.isdir(path):
     os.makedirs(path)
