@@ -1,4 +1,5 @@
 import numpy
+from scipy.stats.mstats import zscore
 
 def entropy_profile( symbols, window_size = 100, window_overlap = 0 ):
     """Calculate the entropy profile of a list of symbols.
@@ -22,6 +23,60 @@ def entropy_profile( symbols, window_size = 100, window_overlap = 0 ):
         probs = dict(zip(key,cnts))
         ent_prof.append(-sum(probs[s] * numpy.log(probs[s]) for s in window))
     return numpy.array(ent_prof)
+
+def entropy_profile_2D(symbols, window_size = 100, window_overlap = 0):
+    """Calculate the 2D entropy profile of symbols (typically mfcc with axis 1 as time).
+
+    Args:
+        symbols (2D numpy.array (int)): Symbols of 2 dimensions.
+        window_size (int, optional):  Number of symbols per entropy window.  Defaults to 100.
+        window_overlap (int, optional):  How much the entropy windows should overlap.  Defaults to 0.
+    
+    Returns:
+        2D numpy.array(float): The 2D entropy profile.
+    """
+    vfun = lambda x : entropy_profile(x, window_size, window_overlap)
+    ent_prof = numpy.apply_along_axis(vfun, 1, symbols)
+    
+    return ent_prof
+
+def estimate_Gaussian(X):
+    """Estimate the parametres of a Gaussian distribution using X
+
+    Args:
+        X (numpy.array (float)): Training dataset with features along axis 0, and examples along axis 1.
+
+    Returns:
+        Mu (numpy.array (float)): mean of the X (n by 1 dimension).
+        Sigma2 (numpy.array (float)): variance of X (n by 1 dimension).
+    """
+
+    Mu = numpy.mean(X, axis=1).reshape(X.shape[0], 1)
+    Sigma2 = numpy.var(X, axis=1).reshape(X.shape[0], 1)
+    return (Mu, Sigma2)
+
+
+def multivariate_Gaussion(X, Mu, Sigma2):
+    """Computes the probability density function of multivariate Gaussian distribution.
+
+    Args:
+        X (1D numpy.array (float)): n by 1 feature vector.
+        Mu (1D numpy.array (float)): n by 1 mean vector.
+        Sigma2 (1D numpy.array (float)): n by 1 variance vector.
+
+    Returns:
+        p (float): probability of input X.
+    """
+    assert X.shape == Mu.shape, "Input X and Mu must be the same shape"
+    assert Mu.shape == Sigma2.shape, "Input Mu and Sigma2 must be the same shape"
+    Sigma2 = numpy.diagflat(Sigma2)
+    Sigma2_inv = numpy.linalg.inv(Sigma2)
+    k = X.shape[0]
+    p = 1 / numpy.sqrt( (2 * numpy.pi) ** k * numpy.linalg.det(Sigma2) )
+    exp_power = -0.5 * numpy.dot( numpy.dot( (X - Mu).T, Sigma2_inv ), (X - Mu) )
+    p *= numpy.exp(exp_power)
+
+    return p
 
 def symbolise( pitches, eps=8e-2 ):
     """Symbolose a small piece of speech segment according to pitch slopes.

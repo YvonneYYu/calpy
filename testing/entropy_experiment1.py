@@ -11,6 +11,8 @@ from calpy.utilities import read_wavfile
 import os
 
 path = "./entropy_experiment1_result/"
+
+path_data = './entropy_experiment1_data/'
 if not os.path.isdir(path):
     os.makedirs(path)
 
@@ -36,7 +38,7 @@ def entropys(symbols, entropy_durations, overlap_factors, N):
             numpy.save(path + "entropy_{}_{:.1f}".format(dur, overlap_factor), ent_prof)
 
 
-fs, sound = read_wavfile('audiodump_8000.wav')
+fs, sound = read_wavfile(path_data + 'test_audio.wav')
 pitches = pitch_profile(sound, fs, lower_threshold = 30, upper_threshold = 1000)
 pauses = pause_profile(sound, fs)
 
