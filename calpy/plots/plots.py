@@ -148,7 +148,7 @@ def mfcc_plot( AA, file_name="", figsize=(16,4) ):
         Args:
             AA (numpy.array(floats)):  2D array containing the MFCC.
             file_name (str, optional):  Outputs picture to this file_name.  Defaults to empty.
-            figsize (tuple(float,float), optional):  A tuple specifying (width, height) in inches of plot.  Defaults to (8,4)
+            figsize (tuple(float,float), optional):  A tuple specifying (width, height) in inches of plot.  Defaults to (16,4)
 
         Returns:
             null : Saves an image to file_name else displays to default plot
@@ -166,7 +166,7 @@ def mfcc_plot( AA, file_name="", figsize=(16,4) ):
     
     return
 
-def heatmap_dist( xs, num_bins=7, num_chunks=10 ):
+def _heatmap_dist( xs, num_bins=7, num_chunks=10 ):
     """A helper function for all_profile_plot that returns a matrix that encodes a pitch distribution as a heatmap.
 
         Args:
@@ -186,7 +186,7 @@ def heatmap_dist( xs, num_bins=7, num_chunks=10 ):
     AA = numpy.delete( AA, 0, 1 )
     return AA
 
-def add_lines( ax, num_chunks ):
+def _add_lines( ax, num_chunks ):
     """A helper function for all_profile_plot that adds lines to indicate plot chunks.
 
         Args:
@@ -245,7 +245,7 @@ def all_profile_plot( file_name, features=["waveform", "mfcc", "pitch", "intensi
             ax.title.set_visible(False)
             ax.plot( xs, sound_chunk )
             ax.margins(0)
-            add_lines( ax, num_chunks=num_chunks )
+            _add_lines( ax, num_chunks=num_chunks )
 
         #feature:  dB profile
         if "dB" in features:
@@ -256,7 +256,7 @@ def all_profile_plot( file_name, features=["waveform", "mfcc", "pitch", "intensi
             IP = dsp.dB_profile( sound_chunk, fs )
             ax.plot( IP, color='b', linestyle='--', marker='o' )
             ax.margins(0)
-            add_lines( ax, num_chunks=num_chunks )
+            _add_lines( ax, num_chunks=num_chunks )
 
         #feature:  Pitch profile
         if "pitch" in features:
@@ -268,7 +268,7 @@ def all_profile_plot( file_name, features=["waveform", "mfcc", "pitch", "intensi
             PP = dsp.pitch_profile( sound_chunk, fs )
             ax.plot( PP, color='r', linestyle='--', marker='o' )
             ax.margins(0)
-            add_lines( ax, num_chunks=num_chunks )
+            _add_lines( ax, num_chunks=num_chunks )
 
         #feature:  Pitch hist
         if "pitch_hist" in features:
@@ -277,9 +277,9 @@ def all_profile_plot( file_name, features=["waveform", "mfcc", "pitch", "intensi
             ax.xaxis.set_visible(False)
             ax.yaxis.set_visible(False)
             ax.title.set_visible(False)
-            AA = heatmap_dist( PP, num_chunks=num_chunks )
+            AA = _add_lines( PP, num_chunks=num_chunks )
             ax.imshow( AA, cmap=plt.cm.Blues, alpha = 1, aspect="auto")
-            add_lines( ax, num_chunks )
+            _add_lines( ax, num_chunks )
 
         #feature:  MFCC
         if "mfcc" in features:
@@ -289,7 +289,7 @@ def all_profile_plot( file_name, features=["waveform", "mfcc", "pitch", "intensi
             ax.title.set_visible(False)
             AA = dsp.mfcc_profile( sound_chunk, fs )
             plt.imshow( AA, cmap = 'hot', alpha = 1, aspect="auto")
-            add_lines( ax, num_chunks=num_chunks )
+            _add_lines( ax, num_chunks=num_chunks )
 
         plt.subplots_adjust(hspace=.05)
 
@@ -302,3 +302,29 @@ def all_profile_plot( file_name, features=["waveform", "mfcc", "pitch", "intensi
 
         if print_status:
             print("Plot {} of {} saved to {}".format(k+1, num_plots, '{}/{}/time{}_{}.png'.format(os.getcwd(),file_name, L, R)))
+
+def feature_distribution(features, output_file, bins=100, showfig=False, savefig=True):
+    """Plot histogram of features
+    Args:
+        features (numpy.array): 1D or 2D feature vector. If 2D, features are along axis 1.
+        output_file (string): path to output figure.
+        bins (int, optional): number of bins, defaults to 100.
+        showfig (bool, optional): True indicates to plot out the figure. Defaults to False.
+        savefig (bool, optional): True indicates to write the figure to disk.
+    
+    Returns:
+        None, save a figure to output_file or show a figure if showfig.
+    """
+    assert showfig or savefig, "showfig and savefig parametres are both False, please set at least one to be True"
+    # number of features.
+    n = features.shape[0]
+    fig = plt.figure()
+    for i in range(n):
+        hist, bins = numpy.histogram(features[i,:], bins=bins, density=False)
+        plt.plot(bins[:-1], hist, '+-', label='feature' + str(i))
+    plt.title('Histogram of all features')
+    plt.legend()
+    if savefig:
+        fig.savefig(output_file, dpi=600)
+    if showfig:
+        fig.show()

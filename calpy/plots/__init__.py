@@ -4,4 +4,5 @@ from .plots import \
     export,\
     profile_plot,\
     mfcc_plot,\
-    all_profile_plot
+    all_profile_plot, \
+    feature_distribution
