@@ -7,6 +7,8 @@ from calpy.entropy import entropy_profile_2D, symbolise_mfcc_multidimension, est
 from calpy.plots import feature_distribution
 from scipy.stats.mstats import zscore
 import matplotlib.pyplot as plt
+
+from sklearn.mixture import GaussianMixture
 import os
 
 ################################data preparation################################
@@ -32,6 +34,7 @@ def trouble_filter(troubles, thre=50):
             cnt = 0
     return troubles_filtered
 
+'''
 data = numpy.loadtxt(path_data + fname + '.csv', delimiter=',')
 trouble_times = numpy.loadtxt(path_data + fname + '_trouble_time_stamps.csv', delimiter=',',dtype=int)
 trouble_times *= 100
@@ -51,20 +54,25 @@ for win in entropy_durations:
         ent_profiles[(win, overlap)] = entropy_profile_2D(X, win, over_win)
 
 #numpy.save(path_res + fname + '_entropys', ent_profiles)
-
+'''
 
 ###############################anormaly detection###############################
 # call calpy.plots.feature_distribution to observe to mfcc features obey Gaussian distribution
+data = numpy.load(path_res + fname + '_training_data.npz')
+X = data['X']
+Y = data['Y']
 feature_distribution(X, None, savefig=False, showfig=True)
 
-#Use Gaussian distribution to detect anomaly
+#Estimate probabilty with Gaussian model
 
 Mu, Sigma2 = estimate_Gaussian(X)
-p = numpy.empty(X.shape[1])
-for idx, x in enumerate(X.T):
-    p[idx] = multivariate_Gaussion(x.reshape(x.shape[0], 1), Mu, Sigma2)
-p /= p.max()
-troubles = p < 0.01
+vfun = lambda x: multivariate_Gaussion(x.reshape(Mu.shape), Mu, Sigma2)
+p = numpy.apply_along_axis(vfun, 0, X).squeeze()
+p /=p.max()
+# plot out p
+fig = plt.figure()
+plt.hist(p, bins=100)
+fig.show()
 
 #fileter out troubles shorter than 0.5 second
 troubles_filtered = trouble_filter(troubles)
@@ -78,31 +86,46 @@ X1 = zscore(X, axis=1)
 m = X1.shape[1]
 X1_CV = numpy.dot(X1, X1.T) / m # co-variance matrix
 U, S, V = numpy.linalg.svd(X1_CV)
-U_reduce = U[:, :3]
-X1_reduce = numpy.dot(U_reduce.T, X1)
 
-Mu_reduce, Sigma2_reduce = estimate_Gaussian(X1_reduce)
-p_reduce = numpy.empty(X1_reduce.shape[1])
-for idx, x_reduce in enumerate(X1_reduce.T):
-    p_reduce[idx] = multivariate_Gaussion(x_reduce.reshape(x_reduce.shape[0], 1), Mu_reduce, Sigma2_reduce)
+# plot out S
+fig = plt.figure()
+plt.plot(S)
+fig.show()
+# S shows that all the dimensions are heavily corelated. So dimension reduction is not suggested to apply here
+#U_reduce = U[:, :5]
+#X1_reduce = numpy.dot(U_reduce.T, X1)
+#
+#Mu_reduce, Sigma2_reduce = estimate_Gaussian(X1_reduce)
+#vfun_reduce = lambda x: multivariate_Gaussion(x.reshape(Mu_reduce.shape), #Mu_reduce, Sigma2_reduce)
+#p_reduce = numpy.apply_along_axis(vfun_reduce, 0, X1_reduce).squeeze()
+#p_reduce /= p_reduce.max()
+#
+## plot out p_reduce
+#fig = plt.figure()
+#plt.plot(numpy.sort(p_reduce)[::-1])
+#fig.show()
+#
+##fileter out troubles shorter than 1 second
+#troubles_reduce_filtered = trouble_filter(troubles_reduce)
 
-p_reduce /= p_reduce.max()
-troubles_reduce = p_reduce < 0.01
 
-#fileter out troubles shorter than 1 second
-troubles_reduce_filtered = trouble_filter(troubles_reduce)
+#gaussian_results = {}
+#gaussian_results['p'] = p
+#gaussian_results['troubles'] = troubles
+#gaussian_results['troubles_filtered'] = troubles_filtered
+#gaussian_results['p_reduce'] = p_reduce
+#gaussian_results['troubles_reduce'] = troubles_reduce
+#gaussian_results['troubles_reduce_filtered'] = troubles_reduce_filtered
 
-
-gaussian_results = {}
-gaussian_results['p'] = p
-gaussian_results['troubles'] = troubles
-gaussian_results['troubles_filtered'] = troubles_filtered
-gaussian_results['p_reduce'] = p_reduce
-gaussian_results['troubles_reduce'] = troubles_reduce
-gaussian_results['troubles_reduce_filtered'] = troubles_reduce_filtered
-
-numpy.save(path_res + fname + '_gaussian_results', gaussian_results)
+#numpy.save(path_res + fname + '_gaussian_results', gaussian_results)
 #for clustering
-X2 = ent_profiles[(300, 0.9)][1:,:]
-X2 = zscore(X2, axis=1)
+data = numpy.load(path_res + fname + '_entropys.npy').item()
+entropy = data[(300,0.9)].T
+
+n_classes = 3
+
+estimator = GaussianMixture(n_components=n_classes, covariance_type='full', max_iter=30, random_state=0)
+estimator.fit(entropy)
+labels = estimator.predict(entropy)
+
 
