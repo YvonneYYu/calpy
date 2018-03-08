@@ -240,6 +240,8 @@ def remove_long_pauses(inputfilename, outputfilename, long_pause=0.5, min_silenc
             if cnt >= long_pause:
                 idxs.append((idx0, idx))
             cnt = 0
+    if cnt:
+        idxs.append((idx0, idx))
     if idxs[-1][-1] != pauses.shape[0]:
         idxs.append((pauses.shape[0], pauses.shape[0]))
     if len(sound.shape) > 1:
@@ -258,7 +260,27 @@ def remove_long_pauses(inputfilename, outputfilename, long_pause=0.5, min_silenc
             s = idx[1] * fs // 100
     wf.write(outputfilename, fs, sounding_sound)
 
-def pause_length_histogram(pauses, min_silence_duration=0.01,bins=30):
+def get_pause_length(pauses):
+    """Compute the length of pause.
+        Args:
+            pauses (numpy array, bool): True indicates occurrence of pause.
+        
+        Returns:
+            res (numpy array): The length of consecutive pauses.
+    """
+    res = []
+    cnt = 0
+    for pause in pauses:
+        if pause:
+            cnt += 1
+        elif cnt:
+            res.append(cnt)
+            cnt = 0
+    if cnt:
+        res.append(cnt)
+    return numpy.array(res)
+
+def pause_length_histogram(pauses, min_silence_duration=0.01, bins=30):
     """Compute the histogram of pause lenghth.
         Args:
             pauses (numpy array, bool): True indicates occurrence of pause.
@@ -271,13 +293,6 @@ def pause_length_histogram(pauses, min_silence_duration=0.01,bins=30):
     """
     assert type(bins) == int, "input to bins must be an integer."
 
-    pause_len = numpy.array([])
-    cnt = 0
-    for pause in pauses:
-        if pause:
-            cnt += 1
-        elif cnt:
-            pause_len = numpy.append(pause_len, cnt)
-            cnt = 0
+    pause_len = get_pause_length(pauses)
     hist, bin_edges = numpy.histogram(pause_len,bins=bins)
     return (hist, bin_edges * min_silence_duration)

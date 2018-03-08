@@ -11,4 +11,6 @@ from .audio_features import \
     pitch_profile, \
     pause_profile, \
     mfcc_profile, \
-    remove_long_pauses
+    remove_long_pauses, \
+    get_pause_length, \
+    pause_length_histogram
