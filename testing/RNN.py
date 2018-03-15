@@ -13,7 +13,7 @@ X_train, Y_train, X_test, Y_test = data['X_train'], data['Y_train'], data['X_tes
 m, T_x, n_x = X_train.shape
 n_a = 64 #number of hidden states
 
-reshaper = Reshape((1, n_x))
+reshapor = Reshape((1, n_x))
 LSTM_cell = LSTM(n_a, return_state = True)
 densor = Dense(n_x, activation='sigmoid')
 
