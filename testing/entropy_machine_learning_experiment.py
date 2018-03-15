@@ -19,6 +19,7 @@ if not os.path.isdir(path_res):
 
 fname = 'PWD003_life_story2_PWD_mfcc'
 
+'''
 def trouble_filter(troubles, thre=50):
     s = 0
     cnt = 0
@@ -32,9 +33,11 @@ def trouble_filter(troubles, thre=50):
             if cnt < thre:
                 troubles_filtered[s:idx] = False
             cnt = 0
+    if cnt and cnt < thre:
+        troubles_filtered[s:idx] = False
     return troubles_filtered
 
-'''
+
 data = numpy.loadtxt(path_data + fname + '.csv', delimiter=',')
 trouble_times = numpy.loadtxt(path_data + fname + '_trouble_time_stamps.csv', delimiter=',',dtype=int)
 trouble_times *= 100
@@ -122,10 +125,16 @@ fig.show()
 data = numpy.load(path_res + fname + '_entropys.npy').item()
 entropy = data[(300,0.9)].T
 
-n_classes = 3
+n_classes = 5
 
 estimator = GaussianMixture(n_components=n_classes, covariance_type='full', max_iter=30, random_state=0)
 estimator.fit(entropy)
 labels = estimator.predict(entropy)
 
 
+t = numpy.arange(labels.shape[0])
+data = mfcc[:,:500]
+fig = plt.figure()
+plt.imshow(data)
+
+fig.show()
