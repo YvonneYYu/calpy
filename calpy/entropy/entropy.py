@@ -171,7 +171,7 @@ def _integer_to_edge_condition( k ):
     Returns:
         [Lcond, Mcond, Rcond] a list of three functions.
     """
-    assert k < 63, "Input k = {} must be < 63.".format(k)
+    assert k < 64, "Input k = {} must be < 64.".format(k)
 
     bdigs = [ int(bit) for bit in '{:06b}'.format(k) ]
     Lcond = lambda x, y : numpy.logical_xor(bdigs[0], x) and numpy.logical_xor(bdigs[1], y)
@@ -208,7 +208,7 @@ def _pause_pattern_boundrys( pause_A, pause_B, Lcond, Mcond, Rcond ):
     Returns:
         [(L, R)] a list of tuples that contains the left and right indeces in pause profiles that satifies Lcond and Mcond and Rcond
     """
-    N = A.shape[0]
+    N = pause_A.shape[0]
 
     middles = _consecutive(numpy.where( Mcond(pause_A, pause_B) )[0])
 
@@ -229,9 +229,9 @@ def symbolise_pauses(pause_A, pause_B):
 
     N = pause_A.shape[0]
 
-    #DONOT CHANGE THE NUMBER 63 AT ANYTIME!!!!
-    symbols = numpy.zeros((63,N))
-    for k in range(63):
+    #DONOT CHANGE THE NUMBER 64 AT ANYTIME!!!!
+    symbols = numpy.zeros((64,N))
+    for k in range(64):
         for (L,R) in _pause_pattern_boundrys( pause_A, pause_B, *_integer_to_edge_condition(k) ):
             symbols[k][L:R+1] = 1
 

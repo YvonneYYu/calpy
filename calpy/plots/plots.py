@@ -309,13 +309,13 @@ def feature_distribution(features, output_file, bins=100, showfig=False, savefig
         features (numpy.array): 1D or 2D feature vector. If 2D, features are along axis 1.
         output_file (string): path to output figure.
         bins (int, optional): number of bins, defaults to 100.
-        showfig (bool, optional): True indicates to plot out the figure. Defaults to False.
-        savefig (bool, optional): True indicates to write the figure to disk.
+        showfig (bool, optional): True indicates to plot out the figure.  Defaults to False.
+        savefig (bool, optional): True indicates to write the figure to disk.  Defaults to True.
     
     Returns:
         None, save a figure to output_file or show a figure if showfig.
     """
-    assert showfig or savefig, "showfig and savefig parametres are both False, please set at least one to be True"
+    assert showfig or savefig, "showfig and savefig parametres are both False, please set at least one to be True."
     # number of features.
     n = features.shape[0]
     fig = plt.figure()

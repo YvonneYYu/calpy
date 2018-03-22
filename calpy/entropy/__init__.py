@@ -6,4 +6,5 @@ multivariate_Gaussion, \
 symbolise, \
 symbolise_speech, \
 symbolise_mfcc, \
-symbolise_mfcc_multidimension
+symbolise_mfcc_multidimension, \
+symbolise_pauses
