@@ -5,14 +5,14 @@ import scipy.io.wavfile as wf
 from .yin import *
 from .. import utilities
 
-def _silence_or_sounding(signal, eps=1e-8):
+def _silence_or_sounding(signal, eps=1e-5):
     """Determine silence and sounding of a given (usually a relatively long period of time) audio.
 
         Implements algorithms of `PAPER`_ .
         
         Args:
             signal (numpy.array(float)): Sound signal in time domain.
-            eps (float, optional): The minimum threshold. Defaults to 1e-8.
+            eps (float, optional): The minimum threshold. Defaults to 1e-5 (previous 1e-8).
         
         Returns:
             list: A 0-1 list marking silence (0) and sounding (1).
@@ -59,7 +59,7 @@ def pause_profile(signal, sampling_rate, min_silence_duration=0.01, time_step = 
             frame_window (float, optional): The length of speech (in seconds) used to estimate pause. Default to 0.025.
         
         Returns:
-            numpy.array(float): 0-1 1D numpy integer array with 1s marking pause.
+            numpy.array(float): 0-1 1D numpy integer array with 1s marking sounding.
     """
     
     signal = signal / max(abs(signal))
@@ -84,6 +84,7 @@ def pause_profile(signal, sampling_rate, min_silence_duration=0.01, time_step = 
             if count >= T:  
                 ans[start:end] = 1
             count = 0
+    ans = numpy.logical_not(ans)
     return utilities.compress_pause_to_time(ans, sampling_rate, time_step=time_step, frame_window=frame_window)
 
 def dB_profile(signal, sampling_rate, time_step = 0.01, frame_window = 0.025):
