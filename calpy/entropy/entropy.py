@@ -169,7 +169,7 @@ def _integer_to_edge_condition( k ):
         k (int): pattern id
 
     Returns:
-        [Lcond, Mcond, Rcond] a list of three functions.
+        (Lcond, Mcond, Rcond) a tuple of three functions.
     """
     assert k < 64, "Input k = {} must be < 64.".format(k)
 
