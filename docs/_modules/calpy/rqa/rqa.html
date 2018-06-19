@@ -1,0 +1,456 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>calpy.rqa.rqa &mdash; CALPY 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="CALPY 1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">CALPY 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for calpy.rqa.rqa</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">numpy</span><span class="o">,</span> <span class="nn">math</span>
+<span class="c1">#from .. import utilities</span>
+
+<div class="viewcode-block" id="phase_space"><a class="viewcode-back" href="../../../calpy.rqa.html#calpy.rqa.rqa.phase_space">[docs]</a><span class="k">class</span> <span class="nc">phase_space</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Phase space class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">eps</span><span class="o">=.</span><span class="mo">001</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eps</span> <span class="o">=</span> <span class="n">tau</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">eps</span>
+        
+        <span class="n">N</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span><span class="o">-</span><span class="n">m</span><span class="o">*</span><span class="n">tau</span><span class="o">+</span><span class="n">tau</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">empty</span><span class="p">([</span><span class="n">N</span><span class="p">,</span><span class="n">m</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">xs</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">+</span><span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="o">*</span><span class="n">tau</span><span class="o">-</span><span class="n">tau</span><span class="p">):</span><span class="n">tau</span><span class="p">]</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">recurrence_matrix</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;phase_space()&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;{} with shape {} and (tau, m, eps) = ({}, {}, {})&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eps</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="nb">id</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></div>
+
+<span class="k">def</span> <span class="nf">_Theta</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">eps</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Theta tmp</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            x:</span>
+<span class="sd">            y:</span>
+<span class="sd">            eps:</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: 0 or 1.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sm</span>  <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)):</span>
+        <span class="n">sm</span> <span class="o">+=</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">-</span><span class="n">y</span><span class="p">[</span><span class="n">k</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span>
+        <span class="k">if</span> <span class="n">sm</span> <span class="o">&gt;</span> <span class="n">eps</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="mi">1</span>
+
+<span class="n">_recurrence_matrix_cache</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+<div class="viewcode-block" id="recurrence_matrix"><a class="viewcode-back" href="../../../calpy.rqa.html#calpy.rqa.rqa.recurrence_matrix">[docs]</a><span class="k">def</span> <span class="nf">recurrence_matrix</span><span class="p">(</span><span class="n">xps</span><span class="p">,</span> <span class="n">yps</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">joint</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Computes cross-reccurence matrix when two inputs are given and self-reccurence otherwise.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            xps (numpy.array): Phase_space object(s).</span>
+<span class="sd">            yps (numpy.array, optional): Phase_space object for cross reccurence.  Defaults to none.</span>
+<span class="sd">            joint (bool, optional):  Should joint reccurence be calculated?  Defaults to False.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            numpy.array : A 2D numpy matrix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">yps</span><span class="p">:</span>
+        <span class="n">yps</span><span class="p">,</span> <span class="n">cross</span> <span class="o">=</span> <span class="n">xps</span><span class="p">,</span> <span class="bp">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cross</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">xps</span><span class="p">,</span><span class="n">yps</span><span class="p">,</span><span class="n">joint</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_recurrence_matrix_cache</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_recurrence_matrix_cache</span><span class="p">[</span><span class="n">xps</span><span class="p">,</span> <span class="n">yps</span><span class="p">,</span> <span class="n">joint</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">xps</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">xps</span><span class="o">.</span><span class="n">tau</span><span class="p">,</span> <span class="n">xps</span><span class="o">.</span><span class="n">m</span><span class="p">,</span> <span class="n">xps</span><span class="o">.</span><span class="n">eps</span><span class="p">)</span> <span class="o">!=</span> <span class="p">(</span><span class="n">yps</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">yps</span><span class="o">.</span><span class="n">tau</span><span class="p">,</span> <span class="n">yps</span><span class="o">.</span><span class="n">m</span><span class="p">,</span> <span class="n">yps</span><span class="o">.</span><span class="n">eps</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Error: Input phase spaces have different parameters.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">joint</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span> <span class="n">recurrence_matrix</span><span class="p">(</span><span class="n">xps</span><span class="p">),</span> <span class="n">recurrence_matrix</span><span class="p">(</span><span class="n">yps</span><span class="p">)</span> <span class="p">)</span>
+
+    <span class="n">BB</span><span class="p">,</span> <span class="n">AA</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">eps</span> <span class="o">=</span> <span class="n">yps</span><span class="o">.</span><span class="n">matrix</span><span class="p">,</span> <span class="n">xps</span><span class="o">.</span><span class="n">matrix</span><span class="p">,</span> <span class="n">xps</span><span class="o">.</span><span class="n">tau</span><span class="p">,</span> <span class="n">xps</span><span class="o">.</span><span class="n">m</span><span class="p">,</span> <span class="n">xps</span><span class="o">.</span><span class="n">eps</span>
+
+    <span class="n">N</span> <span class="o">=</span> <span class="n">AA</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">ans</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">full</span><span class="p">([</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">],</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span> <span class="k">if</span> <span class="n">cross</span> <span class="k">else</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="c1">#ans[i][j] = _Theta( AA[i], BB[j], eps)</span>
+            <span class="n">ans</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">AA</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">BB</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+    
+    <span class="n">_recurrence_matrix_cache</span><span class="p">[</span><span class="n">xps</span><span class="p">,</span><span class="n">yps</span><span class="p">,</span><span class="n">joint</span><span class="p">]</span> <span class="o">=</span> <span class="n">ans</span>
+    <span class="k">return</span> <span class="n">_recurrence_matrix_cache</span><span class="p">[</span><span class="n">xps</span><span class="p">,</span> <span class="n">yps</span><span class="p">,</span> <span class="n">joint</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="cross_recurrence_matrix"><a class="viewcode-back" href="../../../calpy.rqa.html#calpy.rqa.rqa.cross_recurrence_matrix">[docs]</a><span class="k">def</span> <span class="nf">cross_recurrence_matrix</span><span class="p">(</span> <span class="n">xps</span><span class="p">,</span> <span class="n">yps</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Cross reccurence matrix.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            xps (numpy.array):</span>
+<span class="sd">            yps (numpy.array):</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            numpy.array : A 2D numpy array.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">recurrence_matrix</span><span class="p">(</span> <span class="n">xps</span><span class="p">,</span> <span class="n">yps</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="joint_recurrence_matrix"><a class="viewcode-back" href="../../../calpy.rqa.html#calpy.rqa.rqa.joint_recurrence_matrix">[docs]</a><span class="k">def</span> <span class="nf">joint_recurrence_matrix</span><span class="p">(</span> <span class="n">xps</span><span class="p">,</span> <span class="n">yps</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Joint reccurence matrix.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            xps (numpy.array):</span>
+<span class="sd">            yps (numpy.array):</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            numpy.array : A 2D numpy array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">recurrence_matrix</span><span class="p">(</span> <span class="n">xps</span><span class="p">,</span> <span class="n">yps</span><span class="p">,</span> <span class="n">joint</span><span class="o">=</span><span class="bp">True</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="recurrence_rate"><a class="viewcode-back" href="../../../calpy.rqa.html#calpy.rqa.rqa.recurrence_rate">[docs]</a><span class="k">def</span> <span class="nf">recurrence_rate</span><span class="p">(</span> <span class="n">AA</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Computes reccurence-rate from reccurence matrix.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            AA (numpy.array): A reccurence matrix.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            numpy.array : A numpy array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">isLower</span> <span class="o">=</span> <span class="n">utilities</span><span class="o">.</span><span class="n">is_lower_triangular</span><span class="p">(</span><span class="n">AA</span><span class="p">)</span>
+    
+    <span class="n">N</span> <span class="o">=</span> <span class="n">AA</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">ans</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span> <span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span> <span class="p">)</span> 
+
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">N</span><span class="p">):</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">AA</span><span class="p">[:</span><span class="n">k</span><span class="p">,:</span><span class="n">k</span><span class="p">])</span>
+        <span class="n">ans</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tmp</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="o">-</span><span class="n">k</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">isLower</span><span class="p">:</span>
+                <span class="n">tmp</span> <span class="o">+=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">AA</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">k</span><span class="p">])</span> <span class="o">-</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">AA</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="n">k</span><span class="p">,</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">tmp</span> <span class="o">+=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span> <span class="n">AA</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">k</span><span class="p">]</span> <span class="p">)</span> \
+                       <span class="o">+</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span> <span class="n">AA</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span> \
+                       <span class="o">-</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span> <span class="n">AA</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span> \
+                       <span class="o">-</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span> <span class="n">AA</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="n">k</span><span class="p">]</span> <span class="p">)</span>
+            <span class="n">ans</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tmp</span>
+        <span class="n">ans</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">/=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="n">k</span><span class="p">)</span><span class="o">*</span><span class="n">k</span><span class="o">**</span><span class="mi">2</span> <span class="k">if</span> <span class="n">isLower</span> <span class="k">else</span> <span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="n">k</span><span class="p">)</span><span class="o">*</span><span class="n">k</span><span class="o">**</span><span class="mi">2</span>
+
+    <span class="k">return</span> <span class="n">ans</span></div>
+
+
+<span class="n">_measures_cache</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+<div class="viewcode-block" id="determinism"><a class="viewcode-back" href="../../../calpy.rqa.html#calpy.rqa.rqa.determinism">[docs]</a><span class="k">def</span> <span class="nf">determinism</span><span class="p">(</span> <span class="n">AA</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculates percentage of recurrence points which form diagonal lines.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            AA (numpy.array): A reccurence matrix.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The determinism.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">AA</span><span class="p">),</span><span class="s2">&quot;determinism&quot;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_measures_cache</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_measures_cache</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="n">AA</span><span class="p">),</span><span class="s2">&quot;determinism&quot;</span><span class="p">]</span>
+
+    <span class="n">isLower</span> <span class="o">=</span> <span class="n">utilities</span><span class="o">.</span><span class="n">is_lower_triangular</span><span class="p">(</span><span class="n">AA</span><span class="p">)</span>
+
+    <span class="n">N</span> <span class="o">=</span> <span class="n">AA</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">H</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="n">H</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">def</span> <span class="nf">lower_DET</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+            <span class="n">isPrev</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+                <span class="c1">#search for consective lines in AA[idx1,idx1-idx]</span>
+                <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">isPrev</span><span class="p">:</span> 
+                        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">count</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="n">isPrev</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">elif</span> <span class="n">isPrev</span><span class="p">:</span>
+                    <span class="n">isPrev</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="n">H</span><span class="p">[</span><span class="n">count</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span>
+                    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">H</span><span class="p">[</span><span class="n">count</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">count</span><span class="o">&gt;</span><span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="k">return</span>
+
+    <span class="n">lower_DET</span><span class="p">(</span><span class="n">AA</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">isLower</span><span class="p">:</span>
+        <span class="n">lower_DET</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">AA</span><span class="p">))</span>
+
+    <span class="n">num</span><span class="p">,</span> <span class="n">avg</span><span class="p">,</span> <span class="n">max_L</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">H</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">max_L</span> <span class="o">=</span> <span class="n">key</span> <span class="k">if</span> <span class="n">val</span> <span class="k">else</span> <span class="n">max_L</span>
+        <span class="n">num</span> <span class="o">+=</span> <span class="n">key</span><span class="o">*</span><span class="n">val</span>
+        <span class="n">avg</span> <span class="o">+=</span> <span class="n">val</span>
+    
+    <span class="n">dem</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">AA</span><span class="p">)</span>
+    <span class="n">ENTR</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">avg</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">H</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">val</span><span class="o">/</span><span class="n">avg</span>
+            <span class="n">ENTR</span> <span class="o">-=</span> <span class="n">p</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">PRED</span> <span class="o">=</span> <span class="n">num</span><span class="o">/</span><span class="n">avg</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ENTR</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">PRED</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">DIV</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">max_L</span> <span class="k">if</span> <span class="n">max_L</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
+
+    <span class="n">_measures_cache</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="n">AA</span><span class="p">),</span><span class="s2">&quot;determinism&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num</span><span class="o">/</span><span class="n">dem</span>
+    <span class="n">_measures_cache</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="n">AA</span><span class="p">),</span><span class="s2">&quot;pred&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">PRED</span>
+    <span class="n">_measures_cache</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="n">AA</span><span class="p">),</span><span class="s2">&quot;divergence&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DIV</span>
+    <span class="n">_measures_cache</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="n">AA</span><span class="p">),</span><span class="s2">&quot;entropy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ENTR</span>
+
+    <span class="k">return</span> <span class="n">_measures_cache</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="n">AA</span><span class="p">),</span><span class="s2">&quot;determinism&quot;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="divergence"><a class="viewcode-back" href="../../../calpy.rqa.html#calpy.rqa.rqa.divergence">[docs]</a><span class="k">def</span> <span class="nf">divergence</span><span class="p">(</span> <span class="n">AA</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Divergence</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            AA (numpy.array): A numpy array.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            numpy.array: The answer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">AA</span><span class="p">),</span><span class="s2">&quot;divergence&quot;</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_measures_cache</span><span class="p">:</span>
+        <span class="n">determinism</span><span class="p">(</span><span class="n">AA</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">_measures_cache</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="n">AA</span><span class="p">),</span><span class="s2">&quot;divergence&quot;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="entropy"><a class="viewcode-back" href="../../../calpy.rqa.html#calpy.rqa.rqa.entropy">[docs]</a><span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span> <span class="n">AA</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Entropy</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            AA (numpy.array): A numpy array.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            numpy.array: The answer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">AA</span><span class="p">),</span><span class="s2">&quot;entropy&quot;</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_measures_cache</span><span class="p">:</span>
+        <span class="n">determinism</span><span class="p">(</span><span class="n">AA</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">_measures_cache</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="n">AA</span><span class="p">),</span><span class="s2">&quot;entropy&quot;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="pred"><a class="viewcode-back" href="../../../calpy.rqa.html#calpy.rqa.rqa.pred">[docs]</a><span class="k">def</span> <span class="nf">pred</span><span class="p">(</span> <span class="n">AA</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Pred</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            AA (numpy.array): A numpy array.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            numpy.array: The answer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">AA</span><span class="p">),</span><span class="s2">&quot;pred&quot;</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_measures_cache</span><span class="p">:</span>
+        <span class="n">determinism</span><span class="p">(</span><span class="n">AA</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">_measures_cache</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="n">AA</span><span class="p">),</span><span class="s2">&quot;pred&quot;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="trend"><a class="viewcode-back" href="../../../calpy.rqa.html#calpy.rqa.rqa.trend">[docs]</a><span class="k">def</span> <span class="nf">trend</span><span class="p">(</span> <span class="n">AA</span><span class="p">,</span> <span class="n">longterm</span><span class="o">=</span><span class="bp">False</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the TREND of a give 1d numpy array R.</span>
+<span class="sd">    </span>
+<span class="sd">        Args:</span>
+<span class="sd">            AA (numpy.array(float)):  A 2D matrix.</span>
+<span class="sd">            longterm (bool, optional):  Should long-term trend be calculate?  Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The medium and long range trends a float tuple (Med, Long)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">AA</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">R_med</span>  <span class="o">=</span> <span class="n">R</span><span class="p">[:</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">R</span><span class="p">[:</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">R_long</span> <span class="o">=</span> <span class="n">R</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">R</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    
+    <span class="n">coef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span> <span class="o">-</span> <span class="n">N</span><span class="o">//</span><span class="mi">4</span> <span class="o">+</span><span class="mi">1</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="p">)])</span>
+    <span class="n">Med</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">coef</span><span class="p">,</span> <span class="n">R_med</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">coef</span><span class="p">,</span> <span class="n">coef</span><span class="p">)</span>
+    
+    <span class="n">coef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span> <span class="o">-</span> <span class="n">N</span><span class="o">//</span><span class="mi">2</span> <span class="o">+</span><span class="mi">1</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="p">)])</span>
+    <span class="n">Long</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">coef</span><span class="p">,</span> <span class="n">R_long</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">coef</span><span class="p">,</span> <span class="n">coef</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">Long</span> <span class="k">if</span> <span class="n">longterm</span> <span class="k">else</span> <span class="n">Med</span></div>
+
+<div class="viewcode-block" id="laminarity"><a class="viewcode-back" href="../../../calpy.rqa.html#calpy.rqa.rqa.laminarity">[docs]</a><span class="k">def</span> <span class="nf">laminarity</span><span class="p">(</span> <span class="n">AA</span> <span class="p">):</span> <span class="c1">#+ Trapping</span>
+    <span class="sd">&quot;&quot;&quot;Laminarity.  Calculates percentage of recurrence points which form verticle lines.</span>
+
+<span class="sd">    This function calculates Trapping as a side effect.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            AA (numpy.array(float)):  A 2D matrix.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The laminarity</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">N</span> <span class="o">=</span> <span class="n">AA</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">H</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="n">H</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="c1">#Lower Lam</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="n">isPrev</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+            <span class="c1">#search for consecutive lines in M[i, j]</span>
+            <span class="k">if</span> <span class="n">AA</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">isPrev</span><span class="p">:</span> 
+                    <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">isPrev</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">isPrev</span><span class="p">:</span>
+                <span class="n">H</span><span class="p">[</span><span class="n">count</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span>
+                <span class="n">isPrev</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="n">H</span><span class="p">[</span><span class="n">count</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span>
+
+    <span class="c1">#Upper Lam</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">utilities</span><span class="o">.</span><span class="n">is_lower_triangular</span><span class="p">(</span><span class="n">AA</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="n">isPrev</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+                <span class="c1">#search for consecutive lines in M[idx1, idx]</span>
+                <span class="k">if</span> <span class="n">AA</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">isPrev</span><span class="p">:</span> 
+                        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">isPrev</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="mi">1</span>
+                <span class="k">elif</span> <span class="n">isPrev</span><span class="p">:</span>
+                    <span class="n">H</span><span class="p">[</span><span class="n">count</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span>
+                    <span class="n">isPrev</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="mi">0</span>
+            <span class="n">H</span><span class="p">[</span><span class="n">count</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span>
+
+    <span class="n">num</span><span class="p">,</span> <span class="n">avg</span><span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">H</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">avg</span> <span class="o">+=</span> <span class="n">val</span>
+        <span class="n">num</span> <span class="o">+=</span> <span class="n">key</span><span class="o">*</span><span class="n">val</span>
+    <span class="n">dem</span> <span class="o">=</span> <span class="n">num</span> <span class="o">+</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">AA</span><span class="p">)</span>
+
+    <span class="n">LAMI</span> <span class="o">=</span> <span class="n">num</span><span class="o">/</span><span class="n">dem</span>
+    <span class="n">TRAP</span> <span class="o">=</span> <span class="n">num</span><span class="o">/</span><span class="n">avg</span> <span class="k">if</span> <span class="n">avg</span> <span class="k">else</span> <span class="mi">0</span>
+
+    <span class="n">_measures_cache</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="n">AA</span><span class="p">),</span><span class="s2">&quot;laminarity&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">LAMI</span>
+    <span class="n">_measures_cache</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="n">AA</span><span class="p">),</span><span class="s2">&quot;trapping&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">TRAP</span>
+
+    <span class="k">return</span> <span class="n">_measures_cache</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="n">AA</span><span class="p">),</span><span class="s2">&quot;laminarity&quot;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="trapping"><a class="viewcode-back" href="../../../calpy.rqa.html#calpy.rqa.rqa.trapping">[docs]</a><span class="k">def</span> <span class="nf">trapping</span><span class="p">(</span> <span class="n">AA</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Trapping.  Calculates ...</span>
+
+<span class="sd">    This function calculates Laminiarity as a side effect.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            AA (numpy.array(float)):  A 2D matrix.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The trapping</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">AA</span><span class="p">),</span><span class="s2">&quot;trapping&quot;</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_measures_cache</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">laminarity</span><span class="p">(</span><span class="n">AA</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_measures_cache</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="n">AA</span><span class="p">),</span><span class="s2">&quot;trapping&quot;</span><span class="p">]</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">CALPY 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2018, Yvonne Yu and Paul Vrbik.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,20 @@
+calpy.entropy package
+=====================
+
+.. automodule:: calpy.entropy
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+calpy.entropy.entropy module
+----------------------------
+
+.. automodule:: calpy.entropy.entropy
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+

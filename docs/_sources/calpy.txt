@@ -1,0 +1,19 @@
+calpy package
+=============
+
+.. automodule:: calpy
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+
+    calpy.dsp
+    calpy.entropy
+    calpy.plots
+    calpy.rqa
+    calpy.utilities
+

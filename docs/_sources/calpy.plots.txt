@@ -1,0 +1,20 @@
+calpy.plots package
+===================
+
+.. automodule:: calpy.plots
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+calpy.plots.plots module
+------------------------
+
+.. automodule:: calpy.plots.plots
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+

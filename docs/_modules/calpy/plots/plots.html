@@ -1,0 +1,422 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>calpy.plots.plots &mdash; CALPY 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="CALPY 1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">CALPY 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for calpy.plots.plots</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">bokeh.plotting</span>
+<span class="kn">import</span> <span class="nn">bokeh.io</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">utilities</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">dsp</span>
+
+<div class="viewcode-block" id="recurrence"><a class="viewcode-back" href="../../../calpy.plots.html#calpy.plots.plots.recurrence">[docs]</a><span class="k">def</span> <span class="nf">recurrence</span><span class="p">(</span> <span class="n">AA</span><span class="p">,</span> <span class="n">ID</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">),</span> <span class="n">colours</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">,</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span><span class="s2">&quot;green&quot;</span><span class="p">]</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plots a recurrence plot.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            AA (numpy.array(float)):  A  2D reccurence matrix.</span>
+<span class="sd">            ID (numpy.array(int), optional):  A vector so that speaker( col[i] ) = ID[i].  Defaults to the 0 vector.</span>
+<span class="sd">            colours (list(str), optional):  Colours for the plot.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bokeh plot object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">isLower</span> <span class="o">=</span> <span class="n">utilities</span><span class="o">.</span><span class="n">is_lower_triangular</span><span class="p">(</span><span class="n">AA</span><span class="p">)</span>
+    <span class="n">AA</span> <span class="o">=</span> <span class="n">AA</span><span class="o">/</span><span class="n">AA</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+    <span class="n">COLS</span> <span class="o">=</span> <span class="n">colours</span>
+
+    <span class="n">N</span> <span class="o">=</span> <span class="n">AA</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ID</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+        <span class="n">ID</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">cols</span><span class="p">,</span> <span class="n">alphas</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(),</span> <span class="nb">list</span><span class="p">(),</span> <span class="nb">list</span><span class="p">(),</span> <span class="nb">list</span><span class="p">()</span>
+    
+    <span class="n">cell_padding</span> <span class="o">=</span> <span class="o">.</span><span class="mi">8</span>
+
+    <span class="c1"># Note:  r and c are deliberately swapped so that the transpose of AA is plotted</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span> 
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">c</span><span class="o">+</span><span class="mi">1</span> <span class="k">if</span> <span class="n">isLower</span> <span class="k">else</span> <span class="n">N</span><span class="p">):</span>
+        <span class="c1">#for r in range(N):</span>
+            <span class="c1">#triangle bottom</span>
+            <span class="n">xs</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">r</span><span class="p">,</span><span class="n">r</span><span class="o">+</span><span class="n">cell_padding</span><span class="p">,</span><span class="n">r</span><span class="o">+</span><span class="n">cell_padding</span><span class="p">])</span>
+            <span class="n">ys</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">c</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">c</span><span class="o">+</span><span class="n">cell_padding</span><span class="p">])</span>
+            <span class="n">cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">COLS</span><span class="p">[</span><span class="n">ID</span><span class="p">[</span><span class="n">r</span><span class="p">]]</span> <span class="k">if</span> <span class="n">AA</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">r</span><span class="p">]</span><span class="o">&gt;=</span><span class="mi">0</span> <span class="ow">or</span> <span class="n">c</span><span class="o">==</span><span class="n">r</span> <span class="k">else</span> <span class="s2">&quot;pink&quot;</span> <span class="p">)</span>
+            <span class="n">alphas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="mi">1</span><span class="o">-</span><span class="n">AA</span><span class="p">[</span><span class="n">c</span><span class="p">,</span><span class="n">r</span><span class="p">]</span> <span class="p">)</span>
+
+            <span class="c1">#triangle top</span>
+            <span class="n">xs</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">r</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">r</span><span class="o">+</span><span class="n">cell_padding</span><span class="p">])</span>
+            <span class="n">ys</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">c</span><span class="p">,</span><span class="n">c</span><span class="o">+</span><span class="n">cell_padding</span><span class="p">,</span><span class="n">c</span><span class="o">+</span><span class="n">cell_padding</span><span class="p">])</span>
+            <span class="n">cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">COLS</span><span class="p">[</span><span class="n">ID</span><span class="p">[</span><span class="n">c</span><span class="p">]]</span> <span class="k">if</span> <span class="n">AA</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">r</span><span class="p">]</span><span class="o">&gt;=</span><span class="mi">0</span> <span class="ow">or</span> <span class="n">c</span><span class="o">==</span><span class="n">r</span> <span class="k">else</span> <span class="s2">&quot;black&quot;</span> <span class="p">)</span>
+            <span class="n">alphas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="mi">1</span><span class="o">-</span><span class="n">AA</span><span class="p">[</span><span class="n">c</span><span class="p">,</span><span class="n">r</span><span class="p">]</span> <span class="p">)</span>
+
+
+    <span class="c1">#Plot tweaks</span>
+    <span class="n">plot</span> <span class="o">=</span> <span class="n">bokeh</span><span class="o">.</span><span class="n">plotting</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span>
+        <span class="n">plot_width</span><span class="o">=</span><span class="mi">900</span><span class="p">,</span>
+        <span class="n">plot_height</span><span class="o">=</span><span class="mi">900</span><span class="p">,</span>
+        <span class="n">min_border</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">y_range</span><span class="o">=</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
+        <span class="n">x_range</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">plot</span><span class="o">.</span><span class="n">toolbar</span><span class="o">.</span><span class="n">logo</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">plot</span><span class="o">.</span><span class="n">toolbar_location</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">plot</span><span class="o">.</span><span class="n">xgrid</span><span class="o">.</span><span class="n">grid_line_color</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">plot</span><span class="o">.</span><span class="n">ygrid</span><span class="o">.</span><span class="n">grid_line_color</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">plot</span><span class="o">.</span><span class="n">patches</span><span class="p">(</span> <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">cols</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alphas</span> <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">plot</span></div>
+
+<div class="viewcode-block" id="show"><a class="viewcode-back" href="../../../calpy.plots.html#calpy.plots.plots.show">[docs]</a><span class="k">def</span> <span class="nf">show</span><span class="p">(</span> <span class="n">bokeh_plot</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Print a plot to the screen.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            bokeh_plot (bokeh plot object): bokeh plot object.</span>
+
+<span class="sd">        Return</span>
+<span class="sd">            null:  Outputs a plot on the default plot device.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">bokeh</span><span class="o">.</span><span class="n">plotting</span><span class="o">.</span><span class="n">show</span><span class="p">(</span> <span class="n">bokeh_plot</span> <span class="p">)</span>
+    <span class="k">return</span></div>
+
+<div class="viewcode-block" id="export"><a class="viewcode-back" href="../../../calpy.plots.html#calpy.plots.plots.export">[docs]</a><span class="k">def</span> <span class="nf">export</span><span class="p">(</span> <span class="n">bokeh_plot</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">astype</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Save a plot as picture file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            bokeh_plot (bokeh plot object): The plot object to be saved.</span>
+<span class="sd">            file_path (str):  Where to save the picture.</span>
+<span class="sd">            astype (str, optional):  The file type.  Defaults to png, another option is svg.</span>
+
+<span class="sd">        Return</span>
+<span class="sd">            null:  Outputs a plot to a file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">astype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;svg&quot;</span><span class="p">,</span><span class="s2">&quot;png&quot;</span><span class="p">]:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Export type not supported.  Use &#39;svg&#39; or &#39;png&#39; only.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">astype</span><span class="o">==</span><span class="s2">&quot;png&quot;</span><span class="p">:</span>
+        <span class="n">bokeh</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">export_png</span><span class="p">(</span> <span class="n">bokeh_plot</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">file_path</span><span class="o">+</span><span class="s2">&quot;.&quot;</span><span class="o">+</span><span class="n">astype</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">astype</span><span class="o">==</span><span class="s2">&quot;svg&quot;</span><span class="p">:</span>
+        <span class="n">bokeh_plot</span><span class="o">.</span><span class="n">output_backend</span> <span class="o">=</span> <span class="s2">&quot;svg&quot;</span>
+        <span class="n">bokeh</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">export_svgs</span><span class="p">(</span> <span class="n">bokeh_plot</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">file_path</span><span class="o">+</span><span class="s2">&quot;.&quot;</span><span class="o">+</span><span class="n">astype</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="profile_plot"><a class="viewcode-back" href="../../../calpy.plots.html#calpy.plots.plots.profile_plot">[docs]</a><span class="k">def</span> <span class="nf">profile_plot</span><span class="p">(</span> <span class="n">ys</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span> <span class="n">remove_zeros</span><span class="o">=</span><span class="bp">False</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plots points on the plane and connects with a line.</span>
+<span class="sd">    </span>
+<span class="sd">        Args:</span>
+<span class="sd">            ys (numpy.array(floats)):  List of numeric values to be plotted.</span>
+<span class="sd">            xlabel (str, optional):  The name for the x-axis.  Defaults to emtpy.</span>
+<span class="sd">            ylabel (str, optional):  The name for the y-axis.  Defaults to emtpy.</span>
+<span class="sd">            file_name (str, optional):  Outputs picture to this file_name.  Defaults to empty.</span>
+<span class="sd">            figsize (tuple(float,float), optional):  A tuple specifying (width, height) in inches of plot.  Defaults to (8,4)</span>
+<span class="sd">            remove_zeros (bool, optional):  Toggle for replacing 0s with NANs.  Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            null : Saves an image to file_name else displays to default plot</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">remove_zeros</span><span class="p">:</span>
+        <span class="n">ys</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ys</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="c1">#define plot size in inches (width, height) &amp; resolution(DPI)</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span> <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span> <span class="p">)</span>
+    
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span> <span class="n">ys</span><span class="p">,</span> <span class="s1">&#39;m-o&#39;</span><span class="p">,</span>  <span class="n">ms</span><span class="o">=</span><span class="mi">3</span> <span class="p">)</span>
+        
+    <span class="k">if</span> <span class="n">ylabel</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">ylabel</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">xlabel</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">xlabel</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">file_name</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    
+    <span class="k">return</span> </div>
+
+<div class="viewcode-block" id="mfcc_plot"><a class="viewcode-back" href="../../../calpy.plots.html#calpy.plots.plots.mfcc_plot">[docs]</a><span class="k">def</span> <span class="nf">mfcc_plot</span><span class="p">(</span> <span class="n">AA</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plots points on the plane and connects with a line.</span>
+<span class="sd">    </span>
+<span class="sd">        Args:</span>
+<span class="sd">            AA (numpy.array(floats)):  2D array containing the MFCC.</span>
+<span class="sd">            file_name (str, optional):  Outputs picture to this file_name.  Defaults to empty.</span>
+<span class="sd">            figsize (tuple(float,float), optional):  A tuple specifying (width, height) in inches of plot.  Defaults to (16,4)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            null : Saves an image to file_name else displays to default plot</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span> <span class="n">AA</span><span class="p">,</span> <span class="n">cmap</span> <span class="o">=</span> <span class="s1">&#39;hot&#39;</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">file_name</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span> <span class="n">file_name</span> <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    
+    <span class="k">return</span></div>
+
+<span class="k">def</span> <span class="nf">_heatmap_dist</span><span class="p">(</span> <span class="n">xs</span><span class="p">,</span> <span class="n">num_bins</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">num_chunks</span><span class="o">=</span><span class="mi">10</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A helper function for all_profile_plot that returns a matrix that encodes a pitch distribution as a heatmap.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            xs (numpy.array(float)) :  A numpy array of floats.</span>
+<span class="sd">            num_bins : Number of bins for historgram.  Defaults to 7.</span>
+<span class="sd">            num_chunks:  Number of chunks of all_profile_plot.  Defaults to 10.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            numpy.matrix : A matrix for heat mapping. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">AA</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">matrix</span><span class="p">([</span><span class="mi">0</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_bins</span><span class="p">)])</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span><span class="n">num_chunks</span><span class="p">)</span> <span class="p">):</span>
+        <span class="c1">#hist, bin_edges = numpy.histogram( chunk, bins=num_bins )</span>
+        <span class="n">hist</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span> <span class="n">chunk</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">256</span><span class="p">),</span> <span class="n">bins</span><span class="o">=</span><span class="n">num_bins</span> <span class="p">)</span>
+        <span class="n">AA</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span> <span class="p">(</span><span class="n">AA</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span><span class="n">hist</span><span class="p">))</span> <span class="p">)</span>
+    <span class="n">AA</span> <span class="o">=</span> <span class="n">AA</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">AA</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span> <span class="n">AA</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">AA</span>
+
+<span class="k">def</span> <span class="nf">_add_lines</span><span class="p">(</span> <span class="n">ax</span><span class="p">,</span> <span class="n">num_chunks</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A helper function for all_profile_plot that adds lines to indicate plot chunks.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ax (matplotlib axis):  An axis.</span>
+<span class="sd">            num_chunks (int):  Number of chunks to be illustrated.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            null:  Adds lines to input axis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">L</span> <span class="ow">in</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">xmin</span><span class="o">+</span><span class="p">(</span><span class="n">xmax</span><span class="o">-</span><span class="n">xmin</span><span class="p">)</span><span class="o">/</span><span class="n">num_chunks</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="p">(</span><span class="n">xmax</span><span class="o">-</span><span class="n">xmin</span><span class="p">)</span><span class="o">/</span><span class="n">num_chunks</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">L</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">2.0</span> <span class="p">)</span>
+    <span class="k">return</span>
+
+<div class="viewcode-block" id="all_profile_plot"><a class="viewcode-back" href="../../../calpy.plots.html#calpy.plots.plots.all_profile_plot">[docs]</a><span class="k">def</span> <span class="nf">all_profile_plot</span><span class="p">(</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;waveform&quot;</span><span class="p">,</span> <span class="s2">&quot;mfcc&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch&quot;</span><span class="p">,</span> <span class="s2">&quot;intensity&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_hist&quot;</span><span class="p">,</span> <span class="s2">&quot;dB&quot;</span><span class="p">],</span> <span class="n">num_plots</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">num_chunks</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">print_status</span><span class="o">=</span><span class="bp">False</span> <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Plots a multirow plot of various features.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filename (str): path to the audio file.</span>
+<span class="sd">            features (list(string)): list of features to be plotted.  Ignores nonexistent features.  Defaults to [&quot;waveform&quot;, &quot;mfcc&quot;, &quot;pitch&quot;, &quot;intensity&quot;, &quot;pitch_hist&quot;, &quot;dB&quot;]</span>
+<span class="sd">            num_plots (int): divide the intial wavform into num_plots pieces and create one plot each.  Defaults to 200.</span>
+<span class="sd">            num_chunks (int): number of subdivisions of one plot.  Defaults to 10.</span>
+<span class="sd">            scaling (int): scales the size of the output plot.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            null:  saves plots to  a folder in current directory.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">available_features</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;waveform&quot;</span><span class="p">,</span> <span class="s2">&quot;mfcc&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch&quot;</span><span class="p">,</span> <span class="s2">&quot;intensity&quot;</span><span class="p">,</span> <span class="s2">&quot;pitch_hist&quot;</span><span class="p">,</span> <span class="s2">&quot;dB&quot;</span><span class="p">]</span>
+    <span class="n">features</span> <span class="o">=</span> <span class="p">[</span> <span class="n">feat</span> <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">features</span> <span class="k">if</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">available_features</span> <span class="p">]</span>  <span class="c1">#Remove features that do not exist.</span>
+
+    <span class="n">fs</span><span class="p">,</span> <span class="n">sound</span> <span class="o">=</span> <span class="n">utilities</span><span class="o">.</span><span class="n">read_wavfile</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+    <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file_name</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1">#filename without path and extension</span>
+
+    <span class="n">num_feat</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+    <span class="n">N</span>        <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sound</span><span class="p">)</span>
+    <span class="n">stride</span>   <span class="o">=</span> <span class="n">N</span><span class="o">//</span><span class="n">num_plots</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span> 
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_plots</span><span class="p">):</span>
+
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="o">*</span><span class="n">scaling</span><span class="p">,</span> <span class="n">num_feat</span><span class="o">*</span><span class="n">scaling</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">plot_num</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">L</span><span class="p">,</span> <span class="n">R</span>  <span class="o">=</span> <span class="n">stride</span><span class="o">*</span><span class="n">k</span><span class="p">,</span> <span class="n">stride</span><span class="o">*</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">sound_chunk</span> <span class="o">=</span> <span class="n">sound</span><span class="p">[</span><span class="n">L</span><span class="p">:</span><span class="n">R</span><span class="p">]</span>
+
+        <span class="n">xs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span> <span class="n">L</span><span class="o">/</span><span class="n">fs</span><span class="o">+</span><span class="n">n</span><span class="o">/</span><span class="n">fs</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">L</span><span class="p">,</span><span class="n">R</span><span class="p">)</span> <span class="p">)</span>
+
+        <span class="c1">#feature:  Waveform</span>
+        <span class="k">if</span> <span class="s2">&quot;waveform&quot;</span> <span class="ow">in</span> <span class="n">features</span><span class="p">:</span>
+            <span class="n">plot_num</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">num_feat</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">plot_num</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">tick_top</span><span class="p">()</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span> <span class="n">xs</span><span class="p">,</span> <span class="n">sound_chunk</span> <span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">margins</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">_add_lines</span><span class="p">(</span> <span class="n">ax</span><span class="p">,</span> <span class="n">num_chunks</span><span class="o">=</span><span class="n">num_chunks</span> <span class="p">)</span>
+
+        <span class="c1">#feature:  dB profile</span>
+        <span class="k">if</span> <span class="s2">&quot;dB&quot;</span> <span class="ow">in</span> <span class="n">features</span><span class="p">:</span>
+            <span class="n">plot_num</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">num_feat</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">plot_num</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">IP</span> <span class="o">=</span> <span class="n">dsp</span><span class="o">.</span><span class="n">dB_profile</span><span class="p">(</span> <span class="n">sound_chunk</span><span class="p">,</span> <span class="n">fs</span> <span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span> <span class="n">IP</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span> <span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">margins</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">_add_lines</span><span class="p">(</span> <span class="n">ax</span><span class="p">,</span> <span class="n">num_chunks</span><span class="o">=</span><span class="n">num_chunks</span> <span class="p">)</span>
+
+        <span class="c1">#feature:  Pitch profile</span>
+        <span class="k">if</span> <span class="s2">&quot;pitch&quot;</span> <span class="ow">in</span> <span class="n">features</span><span class="p">:</span>
+            <span class="n">plot_num</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">num_feat</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">plot_num</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">256</span><span class="p">)</span>
+            <span class="n">PP</span> <span class="o">=</span> <span class="n">dsp</span><span class="o">.</span><span class="n">pitch_profile</span><span class="p">(</span> <span class="n">sound_chunk</span><span class="p">,</span> <span class="n">fs</span> <span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span> <span class="n">PP</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span> <span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">margins</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">_add_lines</span><span class="p">(</span> <span class="n">ax</span><span class="p">,</span> <span class="n">num_chunks</span><span class="o">=</span><span class="n">num_chunks</span> <span class="p">)</span>
+
+        <span class="c1">#feature:  Pitch hist</span>
+        <span class="k">if</span> <span class="s2">&quot;pitch_hist&quot;</span> <span class="ow">in</span> <span class="n">features</span><span class="p">:</span>
+            <span class="n">plot_num</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">num_feat</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">plot_num</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">AA</span> <span class="o">=</span> <span class="n">_add_lines</span><span class="p">(</span> <span class="n">PP</span><span class="p">,</span> <span class="n">num_chunks</span><span class="o">=</span><span class="n">num_chunks</span> <span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span> <span class="n">AA</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">Blues</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span>
+            <span class="n">_add_lines</span><span class="p">(</span> <span class="n">ax</span><span class="p">,</span> <span class="n">num_chunks</span> <span class="p">)</span>
+
+        <span class="c1">#feature:  MFCC</span>
+        <span class="k">if</span> <span class="s2">&quot;mfcc&quot;</span> <span class="ow">in</span> <span class="n">features</span><span class="p">:</span>
+            <span class="n">plot_num</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">num_feat</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">plot_num</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">AA</span> <span class="o">=</span> <span class="n">dsp</span><span class="o">.</span><span class="n">mfcc_profile</span><span class="p">(</span> <span class="n">sound_chunk</span><span class="p">,</span> <span class="n">fs</span> <span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span> <span class="n">AA</span><span class="p">,</span> <span class="n">cmap</span> <span class="o">=</span> <span class="s1">&#39;hot&#39;</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span>
+            <span class="n">_add_lines</span><span class="p">(</span> <span class="n">ax</span><span class="p">,</span> <span class="n">num_chunks</span><span class="o">=</span><span class="n">num_chunks</span> <span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">hspace</span><span class="o">=.</span><span class="mo">05</span><span class="p">)</span>
+
+        <span class="c1">#save plot</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;{}/time{}_{}.png&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">R</span><span class="p">),</span> 
+            <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> 
+            <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;landscape&quot;</span><span class="p">,</span> 
+            <span class="n">dpi</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">print_status</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Plot {} of {} saved to {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_plots</span><span class="p">,</span> <span class="s1">&#39;{}/{}/time{}_{}.png&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span><span class="n">file_name</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">R</span><span class="p">)))</span></div>
+
+<div class="viewcode-block" id="feature_distribution"><a class="viewcode-back" href="../../../calpy.plots.html#calpy.plots.plots.feature_distribution">[docs]</a><span class="k">def</span> <span class="nf">feature_distribution</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">output_file</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">showfig</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">savefig</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot histogram of features</span>
+<span class="sd">    Args:</span>
+<span class="sd">        features (numpy.array): 1D or 2D feature vector. If 2D, features are along axis 1.</span>
+<span class="sd">        output_file (string): path to output figure.</span>
+<span class="sd">        bins (int, optional): number of bins, defaults to 100.</span>
+<span class="sd">        showfig (bool, optional): True indicates to plot out the figure.  Defaults to False.</span>
+<span class="sd">        savefig (bool, optional): True indicates to write the figure to disk.  Defaults to True.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        None, save a figure to output_file or show a figure if showfig.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">showfig</span> <span class="ow">or</span> <span class="n">savefig</span><span class="p">,</span> <span class="s2">&quot;showfig and savefig parametres are both False, please set at least one to be True.&quot;</span>
+    <span class="c1"># number of features.</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">hist</span><span class="p">,</span> <span class="n">bins</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">features</span><span class="p">[</span><span class="n">i</span><span class="p">,:],</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bins</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">hist</span><span class="p">,</span> <span class="s1">&#39;+-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;feature&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Histogram of all features&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">savefig</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">showfig</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">CALPY 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2018, Yvonne Yu and Paul Vrbik.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

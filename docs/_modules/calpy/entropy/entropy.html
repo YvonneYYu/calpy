@@ -1,0 +1,330 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>calpy.entropy.entropy &mdash; CALPY 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="CALPY 1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">CALPY 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for calpy.entropy.entropy</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">scipy.stats.mstats</span> <span class="kn">import</span> <span class="n">zscore</span>
+
+<div class="viewcode-block" id="entropy_profile"><a class="viewcode-back" href="../../../calpy.entropy.html#calpy.entropy.entropy.entropy_profile">[docs]</a><span class="k">def</span> <span class="nf">entropy_profile</span><span class="p">(</span> <span class="n">symbols</span><span class="p">,</span> <span class="n">window_size</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">window_overlap</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the entropy profile of a list of symbols.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        symbols (numpy.array or list (int)):  A list of symbols.</span>
+<span class="sd">        window_size (int, optional):  Number of symbols per entropy window.  Defaults to 100.</span>
+<span class="sd">        window_overlap (int, optional):  How much the entropy windows should overlap.  Defaults to 0.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy.array(float): The entropy profile.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span>
+    <span class="n">ent_prof</span>  <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">time_step</span> <span class="o">=</span> <span class="n">window_size</span> <span class="o">-</span> <span class="n">window_overlap</span>
+
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">((</span><span class="n">N</span> <span class="o">-</span> <span class="n">window_size</span><span class="p">)</span> <span class="o">//</span> <span class="n">time_step</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">window</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">[</span><span class="n">k</span> <span class="o">*</span> <span class="n">time_step</span> <span class="p">:</span> <span class="n">k</span> <span class="o">*</span> <span class="n">time_step</span> <span class="o">+</span> <span class="n">window_size</span><span class="p">]</span>
+        <span class="n">key</span><span class="p">,</span> <span class="n">cnts</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">cnts</span> <span class="o">=</span> <span class="n">cnts</span> <span class="o">/</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cnts</span><span class="p">)</span>
+        <span class="n">probs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">cnts</span><span class="p">))</span>
+        <span class="n">ent_prof</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="nb">sum</span><span class="p">(</span><span class="n">probs</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">probs</span><span class="p">[</span><span class="n">s</span><span class="p">])</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">window</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ent_prof</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="entropy_profile_2D"><a class="viewcode-back" href="../../../calpy.entropy.html#calpy.entropy.entropy.entropy_profile_2D">[docs]</a><span class="k">def</span> <span class="nf">entropy_profile_2D</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="n">window_size</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">window_overlap</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the 2D entropy profile of symbols (typically mfcc with axis 1 as time).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        symbols (2D numpy.array (int)): Symbols of 2 dimensions.</span>
+<span class="sd">        window_size (int, optional):  Number of symbols per entropy window.  Defaults to 100.</span>
+<span class="sd">        window_overlap (int, optional):  How much the entropy windows should overlap.  Defaults to 0.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        2D numpy.array(float): The 2D entropy profile.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">vfun</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">entropy_profile</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">window_size</span><span class="p">,</span> <span class="n">window_overlap</span><span class="p">)</span>
+    <span class="n">ent_prof</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">apply_along_axis</span><span class="p">(</span><span class="n">vfun</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">symbols</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">ent_prof</span></div>
+
+<div class="viewcode-block" id="estimate_Gaussian"><a class="viewcode-back" href="../../../calpy.entropy.html#calpy.entropy.entropy.estimate_Gaussian">[docs]</a><span class="k">def</span> <span class="nf">estimate_Gaussian</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Estimate the parametres of a Gaussian distribution using X</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        X (numpy.array (float)): Training dataset with features along axis 0, and examples along axis 1.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Mu (numpy.array (float)): mean of the X (n by 1 dimension).</span>
+<span class="sd">        Sigma2 (numpy.array (float)): variance of X (n by 1 dimension).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">Mu</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">Sigma2</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">Mu</span><span class="p">,</span> <span class="n">Sigma2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="multivariate_Gaussion"><a class="viewcode-back" href="../../../calpy.entropy.html#calpy.entropy.entropy.multivariate_Gaussion">[docs]</a><span class="k">def</span> <span class="nf">multivariate_Gaussion</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Mu</span><span class="p">,</span> <span class="n">Sigma2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Computes the probability density function of multivariate Gaussian distribution.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        X (1D numpy.array (float)): n by 1 feature vector.</span>
+<span class="sd">        Mu (1D numpy.array (float)): n by 1 mean vector.</span>
+<span class="sd">        Sigma2 (1D numpy.array (float)): n by 1 variance vector.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        p (float): probability of input X.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">Mu</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot;Input X and Mu must be the same shape&quot;</span>
+    <span class="k">assert</span> <span class="n">Mu</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">Sigma2</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot;Input Mu and Sigma2 must be the same shape&quot;</span>
+    <span class="n">Sigma2</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">diagflat</span><span class="p">(</span><span class="n">Sigma2</span><span class="p">)</span>
+    <span class="n">Sigma2_inv</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">Sigma2</span><span class="p">)</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">**</span> <span class="n">k</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">Sigma2</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">exp_power</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span> <span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="n">Mu</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">Sigma2_inv</span> <span class="p">),</span> <span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="n">Mu</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">p</span> <span class="o">*=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">exp_power</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">p</span></div>
+
+<div class="viewcode-block" id="symbolise"><a class="viewcode-back" href="../../../calpy.entropy.html#calpy.entropy.entropy.symbolise">[docs]</a><span class="k">def</span> <span class="nf">symbolise</span><span class="p">(</span> <span class="n">pitches</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">8e-2</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Symbolose a small piece of speech segment according to pitch slopes.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pitches (numpy.array or list (float)):  A list of pitches.</span>
+<span class="sd">        eps (float, optional):  Treshold of pitch slopes to be considered level.  Defaults to tan(5 degrees).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        int: one symbol of the small piece of speech segment.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#if input pitches are all 0.0, categorise it as silent (3)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">pitches</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="k">return</span> <span class="mi">3</span>
+
+    <span class="n">N</span>  <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pitches</span><span class="p">)</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+    <span class="n">ys</span> <span class="o">=</span> <span class="n">pitches</span>
+
+    <span class="n">AA</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">xs</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N</span><span class="p">)])</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">m</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">AA</span><span class="p">,</span> <span class="n">ys</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1">#return m</span>
+
+    <span class="k">if</span> <span class="n">m</span><span class="o">&gt;</span><span class="n">eps</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span> <span class="c1">#rising</span>
+    <span class="k">elif</span> <span class="o">-</span><span class="n">eps</span> <span class="o">&lt;=</span> <span class="n">m</span> <span class="o">&lt;=</span> <span class="n">eps</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">2</span> <span class="c1"># level</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">1</span> <span class="c1"># falling</span></div>
+
+<div class="viewcode-block" id="symbolise_speech"><a class="viewcode-back" href="../../../calpy.entropy.html#calpy.entropy.entropy.symbolise_speech">[docs]</a><span class="k">def</span> <span class="nf">symbolise_speech</span><span class="p">(</span><span class="n">pitches</span><span class="p">,</span> <span class="n">pauses</span><span class="p">,</span> <span class="n">thre</span><span class="o">=</span><span class="mi">250</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Symbolise a small speech segment according to pitch and pause.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pitches (numpy.array(float)):  A list of pitches.</span>
+<span class="sd">        pauses (numpy.array(int)):  A list of pauses.</span>
+<span class="sd">        thre (float, optional): Threshold of high pitch.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        int: one symbol of the small speech segment.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#if all silent</span>
+    <span class="k">if</span> <span class="n">pauses</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="k">return</span> <span class="mi">1</span>
+    <span class="c1">#high pitch</span>
+    <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">pitches</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">thre</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">2</span>
+    <span class="c1">#normal pitch</span>
+    <span class="k">return</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="symbolise_mfcc"><a class="viewcode-back" href="../../../calpy.entropy.html#calpy.entropy.entropy.symbolise_mfcc">[docs]</a><span class="k">def</span> <span class="nf">symbolise_mfcc</span><span class="p">(</span><span class="n">mfcc</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Symbolise speech according to mfcc.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mfcc (2D numpy.array (float)): A list of mfcc, axis 1 is time and axis 0 is mfcc</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        symbols (numpy.array (float)): A list of symbols.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">symbols</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">mfcc</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">mfcc</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">low_mu</span><span class="p">,</span> <span class="n">med_mu</span><span class="p">,</span> <span class="n">high_mu</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">mu</span><span class="p">[:</span><span class="mi">4</span><span class="p">]),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">mu</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">8</span><span class="p">]),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">mu</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">12</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">mf</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mfcc</span><span class="o">.</span><span class="n">T</span><span class="p">):</span>
+        <span class="n">symbols</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span>  <span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">mf</span><span class="p">[</span><span class="mi">8</span><span class="p">:])</span> <span class="o">&gt;</span> <span class="n">high_mu</span><span class="p">)</span>
+        <span class="n">symbols</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">mf</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">8</span><span class="p">])</span> <span class="o">&gt;</span> <span class="n">med_mu</span><span class="p">)</span>
+        <span class="n">symbols</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span><span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">mf</span><span class="p">[:</span><span class="mi">4</span><span class="p">])</span> <span class="o">&gt;</span> <span class="n">low_mu</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">symbols</span></div>
+
+<div class="viewcode-block" id="symbolise_mfcc_multidimension"><a class="viewcode-back" href="../../../calpy.entropy.html#calpy.entropy.entropy.symbolise_mfcc_multidimension">[docs]</a><span class="k">def</span> <span class="nf">symbolise_mfcc_multidimension</span><span class="p">(</span><span class="n">mfcc</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Symbolise speech in multi-dimensional scale according to mfcc.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mfcc (2D numpy.array (float)): A list of mfcc, axis 1 is time and axis 0 is mfcc</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        symbols (2D numpy.array(int)): Multi-dimensional symbols. A 2D numpy.array with the same shape as input mfcc</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mfcc</span> <span class="o">=</span> <span class="n">zscore</span><span class="p">(</span><span class="n">mfcc</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">symbols</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">mfcc</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">symbols</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span> <span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">mfcc</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">symbols</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span> <span class="n">mfcc</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="k">return</span> <span class="n">symbols</span></div>
+
+<span class="k">def</span> <span class="nf">_integer_to_edge_condition</span><span class="p">(</span> <span class="n">k</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Given a pattern id k, return left, middle, and right conditions</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        k (int): pattern id</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        [Lcond, Mcond, Rcond] a list of three functions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="mi">64</span><span class="p">,</span> <span class="s2">&quot;Input k = {} must be &lt; 64.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+
+    <span class="n">bdigs</span> <span class="o">=</span> <span class="p">[</span> <span class="nb">int</span><span class="p">(</span><span class="n">bit</span><span class="p">)</span> <span class="k">for</span> <span class="n">bit</span> <span class="ow">in</span> <span class="s1">&#39;{:06b}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="p">]</span>
+    <span class="n">Lcond</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">logical_xor</span><span class="p">(</span><span class="n">bdigs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">)</span> <span class="ow">and</span> <span class="n">numpy</span><span class="o">.</span><span class="n">logical_xor</span><span class="p">(</span><span class="n">bdigs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">Mcond</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span> <span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span> <span class="n">numpy</span><span class="o">.</span><span class="n">logical_xor</span><span class="p">(</span><span class="n">bdigs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">xs</span><span class="p">),</span>  <span class="n">numpy</span><span class="o">.</span><span class="n">logical_xor</span><span class="p">(</span><span class="n">bdigs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">ys</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">Rcond</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">logical_xor</span><span class="p">(</span><span class="n">bdigs</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">x</span><span class="p">)</span> <span class="ow">and</span> <span class="n">numpy</span><span class="o">.</span><span class="n">logical_xor</span><span class="p">(</span><span class="n">bdigs</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">y</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">Lcond</span><span class="p">,</span> <span class="n">Mcond</span><span class="p">,</span> <span class="n">Rcond</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_consecutive</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Find left and right indices of consecutive elements.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (numpy.array(int)): 1D numpy.array</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        [(L, R)] a list of tuples that contains the left and right indeces in data that breaks continuity.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="n">runs</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span> <span class="p">(</span><span class="n">run</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">run</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">runs</span> <span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">_pause_pattern_boundrys</span><span class="p">(</span> <span class="n">pause_A</span><span class="p">,</span> <span class="n">pause_B</span><span class="p">,</span> <span class="n">Lcond</span><span class="p">,</span> <span class="n">Mcond</span><span class="p">,</span> <span class="n">Rcond</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute the left and right boundries of a particular pause pattern.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pause_A (numpy.array(int)): 0-1 1D numpy integer array with 1s marking pause of speaker A.</span>
+<span class="sd">        pause_B (numpy.array(int)): 0-1 1D numpy integer array with 1s marking pause of speaker B.</span>
+<span class="sd">        Lcond (function): bool, bool -&gt; bool</span>
+<span class="sd">        Mcond (function): numpy.array(bool), numpy.array(bool) -&gt; numpy.array(bool)</span>
+<span class="sd">        Rcond (function): bool, bool -&gt; bool</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        [(L, R)] a list of tuples that contains the left and right indeces in pause profiles that satifies Lcond and Mcond and Rcond</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">pause_A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">middles</span> <span class="o">=</span> <span class="n">_consecutive</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span> <span class="n">Mcond</span><span class="p">(</span><span class="n">pause_A</span><span class="p">,</span> <span class="n">pause_B</span><span class="p">)</span> <span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="p">[</span> <span class="p">(</span><span class="n">L</span><span class="p">,</span><span class="n">R</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">L</span><span class="p">,</span><span class="n">R</span><span class="p">)</span> <span class="ow">in</span> <span class="n">middles</span> <span class="k">if</span> <span class="n">L</span><span class="o">&gt;</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">R</span><span class="o">+</span><span class="mi">1</span><span class="o">&lt;</span><span class="n">N</span> <span class="ow">and</span> <span class="n">Lcond</span><span class="p">(</span><span class="n">pause_A</span><span class="p">[</span><span class="n">L</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">pause_B</span><span class="p">[</span><span class="n">L</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="ow">and</span> <span class="n">Rcond</span><span class="p">(</span><span class="n">pause_A</span><span class="p">[</span><span class="n">R</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span><span class="n">pause_B</span><span class="p">[</span><span class="n">R</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span> <span class="p">]</span>
+
+<div class="viewcode-block" id="symbolise_pauses"><a class="viewcode-back" href="../../../calpy.entropy.html#calpy.entropy.entropy.symbolise_pauses">[docs]</a><span class="k">def</span> <span class="nf">symbolise_pauses</span><span class="p">(</span><span class="n">pause_A</span><span class="p">,</span> <span class="n">pause_B</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;symbolise a conversation between two speakers into 63 patterns with their pause profiles.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pause_A (numpy.array(int)): 0-1 1D numpy integer array with 1s marking pause of speaker A.</span>
+<span class="sd">        pause_B (numpy.array(int)): 0-1 1D numpy integer array with 1s marking pause of speaker B.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        symbols (numpy.array(int)): a 2D numpy.array with shape (64, pause_A.shape[0]). Axis 1 is the temporal dimension and axis 0 marks the pattern</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">assert</span> <span class="n">pause_A</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">pause_B</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot;input numpy.arrays pause_A and pause_B must have the same shape!&quot;</span>
+
+    <span class="n">N</span> <span class="o">=</span> <span class="n">pause_A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1">#DONOT CHANGE THE NUMBER 64 AT ANYTIME!!!!</span>
+    <span class="n">symbols</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">64</span><span class="p">,</span><span class="n">N</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">64</span><span class="p">):</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">L</span><span class="p">,</span><span class="n">R</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_pause_pattern_boundrys</span><span class="p">(</span> <span class="n">pause_A</span><span class="p">,</span> <span class="n">pause_B</span><span class="p">,</span> <span class="o">*</span><span class="n">_integer_to_edge_condition</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="p">):</span>
+            <span class="n">symbols</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">L</span><span class="p">:</span><span class="n">R</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">symbols</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">CALPY 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2018, Yvonne Yu and Paul Vrbik.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

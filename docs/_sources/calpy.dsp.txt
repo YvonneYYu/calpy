@@ -1,0 +1,28 @@
+calpy.dsp package
+=================
+
+.. automodule:: calpy.dsp
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+calpy.dsp.audio_features module
+-------------------------------
+
+.. automodule:: calpy.dsp.audio_features
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+calpy.dsp.yin module
+--------------------
+
+.. automodule:: calpy.dsp.yin
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+

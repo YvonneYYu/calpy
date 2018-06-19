@@ -1,0 +1,20 @@
+calpy.rqa package
+=================
+
+.. automodule:: calpy.rqa
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+calpy.rqa.rqa module
+--------------------
+
+.. automodule:: calpy.rqa.rqa
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
