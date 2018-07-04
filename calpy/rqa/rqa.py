@@ -1,4 +1,5 @@
-import numpy, math
+import numpy
+import math
 #from .. import utilities
 
 class phase_space(object):

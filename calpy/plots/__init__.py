@@ -5,4 +5,5 @@ from .plots import \
     profile_plot,\
     mfcc_plot,\
     all_profile_plot, \
-    feature_distribution
+    feature_distribution, \
+    sounding_pattern_plot

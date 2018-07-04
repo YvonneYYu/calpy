@@ -1,15 +1,19 @@
 import numpy
 
 import os
+import datetime
 
 import bokeh.plotting
 import bokeh.io
 
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
+import matplotlib.gridspec as gridspec
 
 from .. import utilities
 from .. import dsp
+from .support import *
 
 def recurrence( AA, ID=numpy.empty(0,dtype=int), colours=["red","blue","green"] ):
     """Plots a recurrence plot.
@@ -136,18 +140,18 @@ def profile_plot( ys, xlabel="", ylabel="", file_name="", figsize=(8,4), remove_
         plt.xlabel(xlabel)
 
     if file_name:
-        plt.savefig(file_name)
+        plt.savefig(file_name,dpi=300)
     else:
         plt.show()
     
     return 
 
-def mfcc_plot( AA, file_name="", figsize=(16,4) ):
+def mfcc_plot( AA, file_name="mfcc_plot.png", figsize=(16,4) ):
     """Plots points on the plane and connects with a line.
     
         Args:
             AA (numpy.array(floats)):  2D array containing the MFCC.
-            file_name (str, optional):  Outputs picture to this file_name.  Defaults to empty.
+            file_name (str, optional):  Outputs picture to this file_name.  Defaults to "mfcc_plot.png".
             figsize (tuple(float,float), optional):  A tuple specifying (width, height) in inches of plot.  Defaults to (16,4)
 
         Returns:
@@ -159,11 +163,8 @@ def mfcc_plot( AA, file_name="", figsize=(16,4) ):
     plt.tight_layout()
     plt.axis('off')
 
-    if file_name:
-        plt.savefig( file_name )
-    else:
-        plt.show()
-    
+    plt.savefig( file_name )
+    plt.close()
     return
 
 def _heatmap_dist( xs, num_bins=7, num_chunks=10 ):
@@ -201,7 +202,7 @@ def _add_lines( ax, num_chunks ):
         ax.axvline(x=L, color='m', linewidth=2.0 )
     return
 
-def all_profile_plot( file_name, features=["waveform", "mfcc", "pitch", "intensity", "pitch_hist", "dB"], num_plots=200, num_chunks=10, scaling=4, print_status=False ):
+def all_profile_plot( file_name, features=["waveform", "mfcc", "pitch", "pitch_hist", "dB"], num_plots=200, num_chunks=10, scaling=4, print_status=False ):
     '''Plots a multirow plot of various features.
 
         Args:
@@ -214,7 +215,7 @@ def all_profile_plot( file_name, features=["waveform", "mfcc", "pitch", "intensi
         Returns:
             null:  saves plots to  a folder in current directory.
     '''
-    available_features = ["waveform", "mfcc", "pitch", "intensity", "pitch_hist", "dB"]
+    available_features = ["waveform", "mfcc", "pitch", "pitch_hist", "dB"]
     features = [ feat for feat in features if feat in available_features ]  #Remove features that do not exist.
 
     fs, sound = utilities.read_wavfile(file_name)
@@ -328,3 +329,122 @@ def feature_distribution(features, output_file, bins=100, showfig=False, savefig
         fig.savefig(output_file, dpi=600)
     if showfig:
         fig.show()
+
+def sounding_pattern_plot(
+        A,
+        B,  
+        time_step=0.01,
+        time_range=(0,-1),
+        row_width=10,
+        row_height=1,
+        duration_per_row=60,
+        xtickevery=10,
+        ylabels='short',
+        dpi=300,
+        filename="sounding_pattern_plot",
+        title="sounding_pattern" ):
+    """Plot sounding patterns like uptakes, inner pauses, over takes.
+    Args:
+        A (1D numpy.array): pauses of speaker A, with 1 indicates sounding.
+        B (1D numpy.array): pauses of speaker B, with 1 indicated sounding.
+        time_step (float, optional): time interval in between two elements in seconds, default to 0.01s.
+        time_range ((float, float), optional): time range of the plot in seconds, default to from the entire converstaion.
+        row_width (int, optional): parametre for display purpose, the width of a row, default to 10 units.
+        row_height (int, optional): parametre for display purpose, the height of a row, default to 1 unit.
+        duration_per_row (float, optional): parametre for display purpose, the duration of a row in seconds, default to 60 seconds.
+        xtickevery (float, optional): parametre for display purpose, the duration of time in seconds in between two neighbour x ticks, default to 10 secnds.
+        ylabels (string, optional): self explanatory.
+        dpi (int, optional): self explanatory.
+        filename (string, optional): file name of the output figure.
+        title (string, optional): self explanatory.
+
+        
+    Returns:
+        True, and write figure to disk.
+    """
+
+    colours = ['white', 'lawngreen', 'lightsalmon', 'lightblue', 'darkorchid','tomato', 'cornflowerblue']
+
+    if time_range[1] < 0:
+        time_range = (time_range[0], A.shape[0]*time_step+1)
+
+    total_duration = int(time_range[1]-time_range[0])#s
+    #print("Total duration = {}".format(total_duration))
+
+    A = A[ int(time_range[0]/time_step) : int(time_range[1]/time_step) ]
+    B = B[ int(time_range[0]/time_step) : int(time_range[1]/time_step) ]
+
+    num_subplot_rows = round( total_duration/duration_per_row )
+
+    As = numpy.array_split(A, num_subplot_rows)
+    Bs = numpy.array_split(B, num_subplot_rows)
+
+    plt.figure(figsize=(row_width, row_height*num_subplot_rows), dpi=dpi )
+
+    for plot_row in range(num_subplot_rows):
+        A, B = As[plot_row], Bs[plot_row]
+        ncols = A.shape[0]
+
+        #Build matrix for heat mapping
+        AA = numpy.zeros(shape=(3,ncols))
+
+        AA[0,:] = colours.index('cornflowerblue')*A
+        AA[2,:] = colours.index('tomato')*B
+
+        AA[1, numpy.where( A ) ] = colours.index('cornflowerblue')
+        AA[1, numpy.where( B ) ] = colours.index('tomato')
+        AA[1, numpy.where( A & B ) ] = colours.index('darkorchid')
+
+        #AupB
+        conditions = ranges_satisfying_condition( A, B, *name_to_edge_condition["AupB"] )
+        for L,R in conditions:
+            AA[0:2, L:R+1] = colours.index('lawngreen')
+
+        #BupA
+        conditions = ranges_satisfying_condition( A, B, *name_to_edge_condition["BupA"] )
+        for L,R in conditions:
+            AA[1:3, L:R+1] = colours.index('lawngreen')
+
+        #AipB
+        conditions = ranges_satisfying_condition( A, B, *name_to_edge_condition["AipB"] )
+        for L,R in conditions:
+            AA[0, L:R+1] = colours.index('lightblue')
+
+        #BipA
+        conditions = ranges_satisfying_condition( A, B, *name_to_edge_condition["BipA"] )
+        for L,R in conditions:
+            AA[2, L:R+1] = colours.index('lightsalmon')
+
+        #Plot row
+        if title and plot_row==0:
+            #plt.suptitle breaks tight_layout so give the first row a title instead
+            ax = plt.subplot(num_subplot_rows, 1, plot_row+1, title=title)
+        else:
+            ax = plt.subplot(num_subplot_rows, 1, plot_row+1)
+
+        #Set y coordinate axis
+        ax.set_yticks( [] )
+        ax.set_yticklabels( [] )
+
+        #Set x axis
+        if xtickevery < float('inf'):  #turn off ticks
+            x_range = range(0, ncols+1, int(xtickevery/time_step))
+        else:
+            x_range = []
+        ax.set_xticks( x_range )
+        #Convert seconds to HR:MIN:SEC format
+        to_time_format = lambda x : str(datetime.timedelta(seconds=x*time_step+time_range[0]+plot_row*duration_per_row))
+        ax.set_xticklabels([to_time_format(x) for x in x_range])
+
+        plt.imshow(
+            AA, 
+            cmap=LinearSegmentedColormap.from_list('mycmap', [*colours], N=len(colours) ), 
+            aspect='auto',
+            interpolation="nearest"
+            )
+        
+    #plt.margins(1)
+    plt.tight_layout()
+    plt.savefig('{}.png'.format(filename))
+    
+    return True

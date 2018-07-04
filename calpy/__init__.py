@@ -3,4 +3,5 @@ dsp, \
 entropy, \
 plots, \
 rqa, \
-utilities
+utilities, \
+students
